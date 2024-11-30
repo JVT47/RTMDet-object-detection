@@ -11,3 +11,6 @@ wheels/
 
 # Other files
 *.pth
+*.ipynb
+*.jpg
+*.png

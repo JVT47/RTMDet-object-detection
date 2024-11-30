@@ -6,7 +6,6 @@ from src.processors.rtmdet_preprocessor import RTMDetPreprocessor
 class TestRTMDetPreprocessor:
     preprocessor = RTMDetPreprocessor(
         dest_size=(32, 64),
-        resize=True,
         pad_color=[5, 15, 25],
         mean=[10, 10, 10],
         std=[1, 1, 1],
@@ -22,43 +21,40 @@ class TestRTMDetPreprocessor:
         torch.testing.assert_close(img, target_img)
     
     def test_pad_to_size_1(self) -> None:
-        img = torch.ones((3, 10, 20))
-        dest_size = (20, 20)
-        pad_color = [1.0, 2, 3]
+        img = torch.ones((3, 10, 40))
 
-        target_img = torch.ones((3, 20, 20)) * torch.Tensor(pad_color).reshape((3, 1, 1))
-        target_img[:, :10, :] = img
+        target_img = torch.ones((3, 32, 64)) * torch.Tensor(self.preprocessor.pad_color).reshape((3, 1, 1))
+        target_img[:, :10, :40] = img
 
-        img = self.preprocessor._pad_to_size(img, dest_size, pad_color)
+        img = self.preprocessor._pad_to_size(img)
 
         torch.testing.assert_close(img, target_img)
     
     def test_pad_to_size_2(self) -> None:
         img = torch.ones((3, 10, 5))
-        dest_size = (10, 10)
-        pad_color = [5.0, 5, 5]
 
-        target_img = torch.ones((3, 10, 10)) * torch.Tensor(pad_color).reshape(3, 1, 1)
-        target_img[:, :, :5] = img
+        target_img = torch.ones((3, 32, 64)) * torch.Tensor(self.preprocessor.pad_color).reshape(3, 1, 1)
+        target_img[:, :10, :5] = img
 
-        img = self.preprocessor._pad_to_size(img, dest_size, pad_color)
+        img = self.preprocessor._pad_to_size(img)
 
         torch.testing.assert_close(img, target_img)
     
     def test_resize_with_aspect_ratio_1(self) -> None:
-        img = torch.ones((3, 10, 20))
-        dest_size = (20, 30)
-        img = self.preprocessor._resize_with_aspect_ratio(img, dest_size)
+        img = torch.ones((3, 10, 40))
 
-        target_img = torch.ones((3, 15, 30))
+        target_img = torch.ones((3, 32, 64)) * torch.tensor(self.preprocessor.pad_color).reshape((3, 1, 1))
+        target_img[:, :16, :] = 1
+        
+        img = self.preprocessor.resize_with_aspect_ratio(img)
 
         torch.testing.assert_close(img, target_img)
     
     def test_resize_with_aspect_ratio_2(self) -> None:
-        img = torch.ones((3, 10, 20))
-        dest_size = (40, 100)
-        img = self.preprocessor._resize_with_aspect_ratio(img, dest_size)
+        img = torch.ones((3, 32, 16))
+        img = self.preprocessor.resize_with_aspect_ratio(img)
 
-        target_img = torch.ones((3, 40, 80))
+        target_img = torch.ones((3, 32, 64)) * torch.tensor(self.preprocessor.pad_color).reshape((3, 1, 1))
+        target_img[:, :, :16] = 1
 
         torch.testing.assert_close(img, target_img)
