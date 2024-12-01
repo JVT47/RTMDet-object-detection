@@ -3,7 +3,7 @@ import torch.nn as nn
 import torchvision.transforms.v2 as T_v2
 
 
-class RTMDetPreprocessor(nn.Module):
+class RTMDetPreprocessor:
     """
     Preprocessor that takes an input image tensor, resizes and normalizes
     it for inference. 
@@ -25,7 +25,7 @@ class RTMDetPreprocessor(nn.Module):
         self.pad_color = pad_color
         self.normalize = T_v2.Normalize(mean, std)
     
-    def forward(self, img: torch.Tensor) -> torch.Tensor:
+    def process_image(self, img: torch.Tensor) -> torch.Tensor:
         """
         Preprocesses the input tensor (C, H, W) (RGB).
         Outputs a tensor of shape (C, H_dest, W_dest)
