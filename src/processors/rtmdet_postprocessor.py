@@ -2,8 +2,8 @@ from dataclasses import dataclass
 import torch
 import torchvision
 
+from .utils import BBoxLabelContainer, make_RTMDet_grid_points, transform_reg_pred_to_bbox_pred
 from src.model.types import RTMDetOutput
-
 
 @dataclass
 class DetectionResult:
@@ -37,55 +37,31 @@ class RTMDetPosprocessor:
         Transforms each model output batch element to a detection result. Returns the detecton results in a list
         in the same order as they are in the batch. 
         """
-        batch_size, _, _, _ = model_output.cls_preds[0].shape
+        _, _, first_layer_height, first_layer_width = model_output.cls_preds[0].shape
+        grid_points = make_RTMDet_grid_points(first_layer_height, first_layer_width)
+        batch_preds = model_output.flatten()
 
         detection_results = []
-        for i in range(batch_size):
-            batch_element_cls = model_output.cls_preds[0][i], model_output.cls_preds[1][i], model_output.cls_preds[2][i]
-            batch_element_reg = model_output.reg_preds[0][i], model_output.reg_preds[1][i], model_output.reg_preds[2][i]
-            detection_result = self.process_single_batch_element(RTMDetOutput(batch_element_cls, batch_element_reg))
+        for reg_pred, cls_pred in zip(batch_preds.bboxes, batch_preds.labels):
+            detection_result = self.process_single_batch_element(BBoxLabelContainer(reg_pred, cls_pred), grid_points)
             detection_results.append(detection_result)
         
         return detection_results
     
-    def process_single_batch_element(self, model_output: RTMDetOutput) -> DetectionResult:
+    def process_single_batch_element(self, bbox_and_label_preds: BBoxLabelContainer, grid_points: torch.Tensor) -> DetectionResult:
         """
         Processes the model outputs for a singel image, i.e., the input tensors should not have the batch dimension.
         """
-        bboxes = []
-        classes = []
-        scores = []
-        scales = [8, 16, 32]
+        reg_pred, cls_pred = bbox_and_label_preds.bboxes, bbox_and_label_preds.labels
+        bboxes = transform_reg_pred_to_bbox_pred(reg_pred, grid_points)
 
-        for i in range(3):
-            cls_pred, reg_pred = model_output.cls_preds[i], model_output.reg_preds[i]
-            _, height, width = cls_pred.shape
+        scores, classes = cls_pred.sigmoid().max(dim=-1)
 
-            cls_pred = cls_pred.sigmoid()
-            conf_scores, class_pred = cls_pred.max(dim=0)
+        score_mask = scores > self.score_threshold
 
-            reg_pred = reg_pred.permute(1, 2, 0) # Change from (4, H, W) to (H, W, 4)
-            reg_pred = reg_pred.reshape((-1, 4)) # (H * W, 4)
-            conf_scores = conf_scores.reshape((-1))
-            class_pred = class_pred.reshape((-1))
-            
-            scale = scales[i]
-            points_xx, points_yy = torch.meshgrid(torch.arange(0, height, dtype=torch.float), torch.arange(0, width, dtype=torch.float), indexing="xy")
-            points = torch.stack([points_xx.flatten(), points_yy.flatten()], dim=-1) * scale # shape (H * W, 2) in (x, y) format
-    
-            bbox_pred = torch.cat([points, points], dim=-1)
-            bbox_pred[:, :2] -= reg_pred[:, :2]
-            bbox_pred[:, 2:] += reg_pred[:, 2:]
-
-            score_mask = conf_scores > self.score_threshold
-
-            bboxes.append(bbox_pred[score_mask])
-            classes.append(class_pred[score_mask])
-            scores.append(conf_scores[score_mask])
-        
-        bboxes = torch.cat(bboxes, dim=0)
-        classes = torch.cat(classes, dim=0)
-        scores = torch.cat(scores, dim=0)
+        bboxes = bboxes[score_mask]
+        classes = classes[score_mask]
+        scores = scores[score_mask]
 
         detection_result = self._perform_nms(bboxes, classes, scores)
 
