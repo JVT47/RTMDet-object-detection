@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from ..basic_components import ConvModule
-from ..types import RTMDetCls, RTMDetReg
+from ..types import RTMDetOutput
 
 
 class RTMDetSepBNHead(nn.Module):
@@ -36,7 +36,7 @@ class RTMDetSepBNHead(nn.Module):
                 self.cls_convs[i][j].conv = self.cls_convs[0][j].conv # type: ignore In this case ModuleList contains Sequential so double indexing is ok 
                 self.reg_convs[i][j].conv = self.reg_convs[0][j].conv # type: ignore
         
-    def forward(self, x: tuple[torch.Tensor, torch.Tensor, torch.Tensor]) -> tuple[RTMDetCls, RTMDetReg]:
+    def forward(self, x: tuple[torch.Tensor, torch.Tensor, torch.Tensor]) -> RTMDetOutput:
         cls_scores = []
         reg_preds = []
         for i, out_scale in enumerate([8, 16, 32]): # Output scales for bbox regression
@@ -49,4 +49,4 @@ class RTMDetSepBNHead(nn.Module):
             cls_scores.append(cls_score)
             reg_preds.append(reg_pred * out_scale)
 
-        return tuple(cls_scores), tuple(reg_preds)
+        return RTMDetOutput(tuple(cls_scores), tuple(reg_preds))
