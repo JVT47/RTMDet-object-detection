@@ -38,11 +38,13 @@ def transform_reg_pred_to_bbox_pred(reg_pred: torch.Tensor, grid_points: torch.T
     """
     Transforms reg_pred from the model into bbox coordinates of the form (x_min, y_min, x_max, y_max)
 
-    reg_pred: tensor of shape (n, 4)
+    reg_pred: tensor of shape (n, 4) or (B, n, 4)
     grid_points: tensor of shape (n, 2)
     """
     bbox_pred = torch.cat([grid_points, grid_points], dim=-1)
-    bbox_pred[:, :2] -= reg_pred[:, :2]
-    bbox_pred[:, 2:] += reg_pred[:, 2:]
+    if len(reg_pred.shape) == 3:
+        bbox_pred = bbox_pred.unsqueeze(0)
+    bbox_pred[..., :2] -= reg_pred[..., :2]
+    bbox_pred[..., 2:] += reg_pred[..., 2:]
 
     return bbox_pred

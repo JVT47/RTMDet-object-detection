@@ -37,26 +37,22 @@ class RTMDetPosprocessor:
         Transforms each model output batch element to a detection result. Returns the detecton results in a list
         in the same order as they are in the batch. 
         """
-        _, _, first_layer_height, first_layer_width = model_output.cls_preds[0].shape
-        grid_points = make_RTMDet_grid_points(first_layer_height, first_layer_width)
-        batch_preds = model_output.flatten()
+        batch_preds = model_output.process_and_combine_layers()
 
         detection_results = []
-        for reg_pred, cls_pred in zip(batch_preds.bboxes, batch_preds.labels):
-            detection_result = self.process_single_batch_element(BBoxLabelContainer(reg_pred, cls_pred), grid_points)
+        for bbox_pred, cls_pred in zip(batch_preds.bboxes, batch_preds.labels):
+            detection_result = self.process_single_batch_element(BBoxLabelContainer(bbox_pred, cls_pred))
             detection_results.append(detection_result)
         
         return detection_results
     
-    def process_single_batch_element(self, bbox_and_label_preds: BBoxLabelContainer, grid_points: torch.Tensor) -> DetectionResult:
+    def process_single_batch_element(self, bbox_and_label_preds: BBoxLabelContainer) -> DetectionResult:
         """
         Processes the model outputs for a singel image, i.e., the input tensors should not have the batch dimension.
         """
-        reg_pred, cls_pred = bbox_and_label_preds.bboxes, bbox_and_label_preds.labels
-        bboxes = transform_reg_pred_to_bbox_pred(reg_pred, grid_points)
+        bboxes, cls_pred = bbox_and_label_preds.bboxes, bbox_and_label_preds.labels
 
-        scores, classes = cls_pred.sigmoid().max(dim=-1)
-
+        scores, classes = cls_pred.max(dim=-1)
         score_mask = scores > self.score_threshold
 
         bboxes = bboxes[score_mask]
