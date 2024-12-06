@@ -4,8 +4,7 @@ import torch.nn as nn
 from .backbone.cspnext import CSPNeXt
 from .neck.cspnext_pafpn import CSPNeXtPAFPN
 from .head.rtmdet_sep_bn_head import RTMDetSepBNHead
-from .types import RTMDetOutput
-
+from src.dataclasses.rtmdet_output import RTMDetOutput
 
 
 class RTMDetTiny(nn.Module):

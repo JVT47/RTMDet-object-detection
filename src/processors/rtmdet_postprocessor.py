@@ -2,17 +2,9 @@ from dataclasses import dataclass
 import torch
 import torchvision
 
-from .utils import BBoxLabelContainer, make_RTMDet_grid_points, transform_reg_pred_to_bbox_pred
-from src.model.types import RTMDetOutput
-
-@dataclass
-class DetectionResult:
-    """
-    A class to hold the bounding boxes, classes and confidence scores for an image. 
-    """
-    bboxes: torch.Tensor # (N, 4) N = number of positive detections
-    classes: torch.Tensor # (N)
-    scores: torch.Tensor # (N)
+from src.dataclasses.bbox_label_container import BBoxLabelContainer
+from src.dataclasses.detection_result import DetectionResult
+from src.dataclasses.rtmdet_output import RTMDetOutput
 
 
 class RTMDetPosprocessor:
