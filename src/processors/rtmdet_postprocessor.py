@@ -55,7 +55,7 @@ class RTMDetPosprocessor:
 
         return detection_result
 
-    def _perform_nms(self, bboxes, classes, scores) -> DetectionResult:
+    def _perform_nms(self, bboxes: torch.Tensor, classes: torch.Tensor, scores: torch.Tensor) -> DetectionResult:
         """
         Perform non maximum supression for each individual class and returns the kept detections. NMS is done
         for each individual class to allow different classes to overlap. All input tensors should not have the batch 
