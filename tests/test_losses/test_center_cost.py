@@ -1,0 +1,16 @@
+import torch
+
+from src.losses.center_cost import CenterCost
+
+
+class TestCenterCost:
+    center_cost = CenterCost(alpha=10, beta=1)
+
+    def test_forward(self) -> None:
+        gt_bbox = torch.tensor([0, 0, 2, 2])
+        grid_poins = torch.tensor([[0, 0], [1, 0], [0, 1], [1, 1]])
+
+        cost = self.center_cost(gt_bbox, grid_poins)
+        target = torch.tensor([2.595, 1, 1, 0.1])
+
+        torch.testing.assert_close(cost, target, atol=1e-2, rtol=0.0)
