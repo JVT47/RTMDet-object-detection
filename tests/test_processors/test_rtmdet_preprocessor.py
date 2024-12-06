@@ -11,7 +11,7 @@ class TestRTMDetPreprocessor:
         std=[1, 1, 1],
     )
 
-    def test_forward(self) -> None:
+    def test_process_image(self) -> None:
         img = torch.ones((3, 32, 32)) * torch.tensor([0, 10, 20]).reshape((3, 1, 1))
         img = self.preprocessor.process_image(img)
 
