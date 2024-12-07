@@ -9,26 +9,31 @@ class RTMDetSepBNHead(nn.Module):
     """
     Bounding box head of the RTMDet detector.
     """
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, widen_factor: float, num_classes: int, *args, **kwargs) -> None:
+        """
+        widen_factor: the factor by which the out_channels should be multiplied.
+        All factor should be relative to RTMDet large model. 
+        num_classes: the number of classes the model should predict.
+        """
         super().__init__(*args, **kwargs)
 
         self.cls_convs = nn.ModuleList([
             *[nn.Sequential(
-                ConvModule(in_channels=96, out_channels=96, kernel_size=3, stride=1, padding=1),
-                ConvModule(in_channels=96, out_channels=96, kernel_size=3, stride=1, padding=1)
+                ConvModule(in_channels=round(256 * widen_factor), out_channels=round(256 * widen_factor), kernel_size=3, stride=1, padding=1),
+                ConvModule(in_channels=round(256 * widen_factor), out_channels=round(256 * widen_factor), kernel_size=3, stride=1, padding=1)
             ) for _ in range(3)]
         ])
         self.reg_convs = nn.ModuleList([
             *[nn.Sequential(
-                ConvModule(in_channels=96, out_channels=96, kernel_size=3, stride=1, padding=1),
-                ConvModule(in_channels=96, out_channels=96, kernel_size=3, stride=1, padding=1),
+                ConvModule(in_channels=round(256 * widen_factor), out_channels=round(256 * widen_factor), kernel_size=3, stride=1, padding=1),
+                ConvModule(in_channels=round(256 * widen_factor), out_channels=round(256 * widen_factor), kernel_size=3, stride=1, padding=1),
             ) for _ in range(3)]
         ])
         self.rtm_cls = nn.ModuleList([
-            *[nn.Conv2d(in_channels=96, out_channels=80, kernel_size=1, stride=1) for _ in range(3)]
+            *[nn.Conv2d(in_channels=round(256 * widen_factor), out_channels=num_classes, kernel_size=1, stride=1) for _ in range(3)]
         ])
         self.rtm_reg = nn.ModuleList([
-            *[nn.Conv2d(in_channels=96, out_channels=4, kernel_size=1, stride=1) for _ in range(3)]
+            *[nn.Conv2d(in_channels=round(256 * widen_factor), out_channels=4, kernel_size=1, stride=1) for _ in range(3)]
         ])
         # share conv weights 
         for i in range(3):

@@ -8,30 +8,35 @@ class CSPNeXt(nn.Module):
     """
     Backbone of the RTMDet object detector.
     """
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, widen_factor: float, deepen_factor: float, *args, **kwargs) -> None:
+        """
+        widen_factor: the factor by which the out_channels should be multiplied.
+        deepen_factor: the factor by which the depth of the network should be multiplied. 
+        All factor should be relative to RTMDet large model. 
+        """
         super().__init__(*args, **kwargs)
 
         self.stem = nn.Sequential(
-            ConvModule(in_channels=3, out_channels=12, kernel_size=3, stride=2, padding=1),
-            ConvModule(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
-            ConvModule(in_channels=12, out_channels=24, kernel_size=3, stride=1, padding=1),
+            ConvModule(in_channels=3, out_channels=round(32 * widen_factor), kernel_size=3, stride=2, padding=1),
+            ConvModule(in_channels=round(32 * widen_factor), out_channels=round(32 * widen_factor), kernel_size=3, stride=1, padding=1),
+            ConvModule(in_channels=round(32 * widen_factor), out_channels=round(64 * widen_factor), kernel_size=3, stride=1, padding=1),
         )
         self.stage1 = nn.Sequential(
-            ConvModule(in_channels=24, out_channels=48, kernel_size=3, stride=2, padding=1),
-            CSPLayer(in_channels=48, out_channels=48, add=True, n=1, attention=True),
+            ConvModule(in_channels=round(64 * widen_factor), out_channels=round(128 * widen_factor), kernel_size=3, stride=2, padding=1),
+            CSPLayer(in_channels=round(128 * widen_factor), out_channels=round(128 * widen_factor), add=True, n=round(3 * deepen_factor), attention=True),
         )
         self.stage2 = nn.Sequential(
-            ConvModule(in_channels=48, out_channels=96, kernel_size=3, stride=2, padding=1),
-            CSPLayer(in_channels=96, out_channels=96, add=True, n=1, attention=True),
+            ConvModule(in_channels=round(128 * widen_factor), out_channels=round(256 * widen_factor), kernel_size=3, stride=2, padding=1),
+            CSPLayer(in_channels=round(256 * widen_factor), out_channels=round(256 * widen_factor), add=True, n=round(6 * deepen_factor), attention=True),
         )
         self.stage3 = nn.Sequential(
-            ConvModule(in_channels=96, out_channels=192, kernel_size=3, stride=2, padding=1),
-            CSPLayer(in_channels=192, out_channels=192, add=True, n=1, attention=True),
+            ConvModule(in_channels=round(256 * widen_factor), out_channels=round(512 * widen_factor), kernel_size=3, stride=2, padding=1),
+            CSPLayer(in_channels=round(512 * widen_factor), out_channels=round(512 * widen_factor), add=True, n=round(6 * deepen_factor), attention=True),
         )
         self.stage4 = nn.Sequential(
-            ConvModule(in_channels=192, out_channels=384, kernel_size=3, stride=2, padding=1),
-            SPPFBottleneck(in_channels=384),
-            CSPLayer(in_channels=384, out_channels=384, add=False, n=1, attention=True),
+            ConvModule(in_channels=round(512 * widen_factor), out_channels=round(1024 * widen_factor), kernel_size=3, stride=2, padding=1),
+            SPPFBottleneck(in_channels=round(1024 * widen_factor)),
+            CSPLayer(in_channels=round(1024 * widen_factor), out_channels=round(1024 * widen_factor), add=False, n=round(3 * deepen_factor), attention=True),
         )
     
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
