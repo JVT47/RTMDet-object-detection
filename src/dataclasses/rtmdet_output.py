@@ -23,8 +23,8 @@ class RTMDetOutput:
         _, _, height, width = self.cls_preds[0].shape
 
         for scale in scales:
-            points_xx, points_yy = torch.meshgrid(torch.arange(0, height, dtype=torch.float),
-                                                torch.arange(0, width, dtype=torch.float), indexing="xy")
+            points_xx, points_yy = torch.meshgrid(torch.arange(0, width, dtype=torch.float),
+                                                torch.arange(0, height, dtype=torch.float), indexing="xy")
             points = torch.stack([points_xx.flatten(), points_yy.flatten()], dim=-1) * scale # shape (H * W, 2) in (x, y) format
             grid_points.append(points)
 
