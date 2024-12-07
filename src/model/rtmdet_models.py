@@ -19,7 +19,7 @@ class RTMDetTiny(nn.Module):
         deepen_factor = 0.167
         self.backbone = CSPNeXt(widen_factor, deepen_factor)
         self.neck = CSPNeXtPAFPN(widen_factor, deepen_factor)
-        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes)
+        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes, exp_on_reg=False)
 
     def forward(self, x: torch.Tensor) -> RTMDetOutput:
         out = self.backbone(x)
@@ -39,7 +39,7 @@ class RTMDetS(nn.Module):
         deepen_factor = 0.33
         self.backbone = CSPNeXt(widen_factor, deepen_factor)
         self.neck = CSPNeXtPAFPN(widen_factor, deepen_factor)
-        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes)
+        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes, exp_on_reg=False)
 
     def forward(self, x: torch.Tensor) -> RTMDetOutput:
         out = self.backbone(x)
@@ -59,7 +59,7 @@ class RTMDetM(nn.Module):
         deepen_factor = 0.67
         self.backbone = CSPNeXt(widen_factor, deepen_factor)
         self.neck = CSPNeXtPAFPN(widen_factor, deepen_factor)
-        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes)
+        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes, exp_on_reg=True)
 
     def forward(self, x: torch.Tensor) -> RTMDetOutput:
         out = self.backbone(x)
@@ -79,7 +79,7 @@ class RTMDetL(nn.Module):
         deepen_factor = 1.0
         self.backbone = CSPNeXt(widen_factor, deepen_factor)
         self.neck = CSPNeXtPAFPN(widen_factor, deepen_factor)
-        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes)
+        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes, exp_on_reg=True)
 
     def forward(self, x: torch.Tensor) -> RTMDetOutput:
         out = self.backbone(x)
@@ -99,7 +99,7 @@ class RTMDetX(nn.Module):
         deepen_factor = 1.33
         self.backbone = CSPNeXt(widen_factor, deepen_factor)
         self.neck = CSPNeXtPAFPN(widen_factor, deepen_factor)
-        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes)
+        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes, exp_on_reg=True)
 
     def forward(self, x: torch.Tensor) -> RTMDetOutput:
         out = self.backbone(x)

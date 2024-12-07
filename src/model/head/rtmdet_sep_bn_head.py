@@ -9,14 +9,16 @@ class RTMDetSepBNHead(nn.Module):
     """
     Bounding box head of the RTMDet detector.
     """
-    def __init__(self, widen_factor: float, num_classes: int, *args, **kwargs) -> None:
+    def __init__(self, widen_factor: float, num_classes: int, exp_on_reg: bool, *args, **kwargs) -> None:
         """
         widen_factor: the factor by which the out_channels should be multiplied.
         All factor should be relative to RTMDet large model. 
         num_classes: the number of classes the model should predict.
+        exp_on_reg: if true applies the exponential funtion to the reg preds before multiplying by the out scale.
         """
         super().__init__(*args, **kwargs)
 
+        self.exp_on_reg = exp_on_reg
         self.cls_convs = nn.ModuleList([
             *[nn.Sequential(
                 ConvModule(in_channels=round(256 * widen_factor), out_channels=round(256 * widen_factor), kernel_size=3, stride=1, padding=1),
@@ -50,8 +52,12 @@ class RTMDetSepBNHead(nn.Module):
 
             reg_pred = self.reg_convs[i](x[i])
             reg_pred = self.rtm_reg[i](reg_pred)
+            if self.exp_on_reg:
+                reg_pred = reg_pred.exp() * out_scale
+            else:
+                reg_pred = reg_pred * out_scale
 
             cls_scores.append(cls_score)
-            reg_preds.append(reg_pred * out_scale)
+            reg_preds.append(reg_pred)
 
         return RTMDetOutput(tuple(cls_scores), tuple(reg_preds))
