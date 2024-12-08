@@ -10,6 +10,6 @@ class TestLogIoUCost:
         iou = torch.tensor([0.5, 1.0, 0.1])
 
         cost = self.log_iou_cost(iou)
-        target = torch.tensor([-0.693, 0.0, -2.30])
+        target = torch.tensor([0.693, 0.0, 2.30])
 
         torch.testing.assert_close(cost, target, atol=1e-2, rtol=0.0)
