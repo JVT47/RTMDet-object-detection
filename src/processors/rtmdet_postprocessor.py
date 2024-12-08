@@ -10,7 +10,10 @@ from src.dataclasses.rtmdet_output import RTMDetOutput
 class RTMDetPosprocessor:
     """
     Potprocessor that takes RTMDet model outputs and converts
-    them to bounding boxes.
+    them to bounding boxes. The bounding box locations are given as 
+    coordinates in the model input images that are likely to be
+    padded so they do not directly convert to the dimensions of the 
+    original input image. 
     """
     def __init__(self, score_threshold: float = 0.5, iou_threshold: float = 0.5, *args, **kwargs) -> None:
         """
