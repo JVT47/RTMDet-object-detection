@@ -37,7 +37,7 @@ class RTMDetOutput:
         """
         Combines the prediction from each layer in to one tensor and 
         flattens them to shapes (B, n, num_classes) and (B, n, 4), respectively. 
-        Additonally, applies the sigmoid function to class predictions and transforms
+        Additionally, applies the sigmoid function to class predictions and transforms
         reg_preds to bboxes of form (x_min, y_min, x_max, y_max).
         """
         batch_size, num_classes, _, _ = self.cls_preds[0].shape

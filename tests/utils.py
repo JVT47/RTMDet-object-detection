@@ -18,7 +18,7 @@ def create_model_output_1() -> RTMDetOutput:
     reg_1[0, 1, 1] = torch.tensor([1, 1, 0, 0]) # bbox [7, 7, 8, 8]
     reg_1 = reg_1.permute(0, 3, 1, 2)
     reg_2 = torch.zeros((2, 2, 2, 4))
-    reg_2[1, 1, 1] = torch.tensor([0, 0, 1, 1]) # bboc [16, 16, 17, 17]
+    reg_2[1, 1, 1] = torch.tensor([0, 0, 1, 1]) # bbox [16, 16, 17, 17]
     reg_2 = reg_2.permute(0, 3, 1, 2)
     reg_3 = torch.zeros((2, 4, 1, 1))
 

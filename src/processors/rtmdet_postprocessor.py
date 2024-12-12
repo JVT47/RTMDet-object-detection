@@ -7,9 +7,9 @@ from src.dataclasses.detection_result import DetectionResult
 from src.dataclasses.rtmdet_output import RTMDetOutput
 
 
-class RTMDetPosprocessor:
+class RTMDetPostprocessor:
     """
-    Potprocessor that takes RTMDet model outputs and converts
+    Postprocessor that takes RTMDet model outputs and converts
     them to bounding boxes. The bounding box locations are given as 
     coordinates in the model input images that are likely to be
     padded so they do not directly convert to the dimensions of the 
@@ -29,7 +29,7 @@ class RTMDetPosprocessor:
     
     def process_batch(self, model_output: RTMDetOutput) -> list[DetectionResult]:
         """
-        Transforms each model output batch element to a detection result. Returns the detecton results in a list
+        Transforms each model output batch element to a detection result. Returns the detection results in a list
         in the same order as they are in the batch. 
         """
         batch_preds = model_output.process_and_combine_layers()
@@ -43,7 +43,7 @@ class RTMDetPosprocessor:
     
     def process_single_batch_element(self, bbox_and_label_preds: BBoxLabelContainer) -> DetectionResult:
         """
-        Processes the model outputs for a singel image, i.e., the input tensors should not have the batch dimension.
+        Processes the model outputs for a single image, i.e., the input tensors should not have the batch dimension.
         """
         bboxes, cls_pred = bbox_and_label_preds.bboxes, bbox_and_label_preds.labels
 
@@ -60,7 +60,7 @@ class RTMDetPosprocessor:
 
     def _perform_nms(self, bboxes: torch.Tensor, classes: torch.Tensor, scores: torch.Tensor) -> DetectionResult:
         """
-        Perform non maximum supression for each individual class and returns the kept detections. NMS is done
+        Perform non maximum suppression for each individual class and returns the kept detections. NMS is done
         for each individual class to allow different classes to overlap. All input tensors should not have the batch 
         dimension.
         """

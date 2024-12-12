@@ -19,7 +19,7 @@ class QualityFocalLoss(nn.Module):
         """
         pred_label: tensor of shape (B, n, c) or (n, c) where n is the number of predictions and c the number of classes.
         target_label: tensor of shape (B, n, c) or (n, c). Usually the targets are one-hot encoded.
-        IoU: tensorf of shape (B, n) or (n). The IoU score between the prediction and target. Used to calculate the soft label.
+        IoU: tensor of shape (B, n) or (n). The IoU score between the prediction and target. Used to calculate the soft label.
         """
         soft_label = target_label * IoU.unsqueeze(-1)
         

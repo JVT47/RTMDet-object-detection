@@ -1,3 +1,14 @@
 {
-    "python.analysis.typeCheckingMode": "standard"
+    "python.analysis.typeCheckingMode": "standard",
+    "cSpell.words": [
+        "argmin",
+        "bboxes",
+        "giou",
+        "meshgrid",
+        "mmdet",
+        "preds",
+        "rtmdet",
+        "rtol",
+        "stds"
+    ]
 }
