@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import torch
 import torchvision
 
@@ -57,6 +56,24 @@ class RTMDetPostprocessor:
         detection_result = self._perform_nms(bboxes, classes, scores)
 
         return detection_result
+
+    @staticmethod
+    def bbox_to_original_image(bboxes: torch.Tensor, preprocess_shape: torch.Size, orig_img_shape: torch.Size) -> torch.Tensor:
+        """
+        Transforms bboxes in the preprocessed image shape back to the original image dimensions.
+        bboxes: tensor of shape (n, 4)
+        preprocess_shape: Size of form (..., H_1, W_1). Shape of preprocessed images
+        orig_img_shape: Size of form (..., H_2, W_2). Shape of the original image.
+        """
+        orig_height, orig_width = orig_img_shape[-2:]
+        pre_height, pre_width = preprocess_shape[-2:]
+        scale_factor = min(pre_height / orig_height, pre_width / orig_width)
+        rescale_height, rescale_width = int(scale_factor * orig_height), int(scale_factor * orig_width)
+
+        bboxes /= torch.tensor([rescale_width, rescale_height, rescale_width, rescale_height])
+        bboxes *= torch.tensor([orig_width, orig_height, orig_width, orig_height])
+
+        return bboxes
 
     def _perform_nms(self, bboxes: torch.Tensor, classes: torch.Tensor, scores: torch.Tensor) -> DetectionResult:
         """
