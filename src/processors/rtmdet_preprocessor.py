@@ -33,26 +33,46 @@ class RTMDetPreprocessor:
         img = self.normalize(img)
 
         return img
+
+    def process_bboxes(self, bboxes: torch.Tensor, img_shape: torch.Size) -> torch.Tensor:
+        """
+        Transform the bbox coordinates from the original image dimensions to the preprocessed image dimensions.
+        bboxes: tensor of shape (n, 4) (x_min, y_min, x_max, y_max)
+        img_shape: tensor of shape (..., H, W). The original image's shape
+        """
+        height, width = img_shape[-2:]
+        new_height, new_width = self._calc_new_height_width(img_shape)
+
+        bboxes /= torch.tensor([width, height, width, height])
+        bboxes *= torch.tensor([new_width, new_height, new_width, new_height])
+
+        return bboxes
     
     def resize_with_aspect_ratio(self, img: torch.Tensor) -> torch.Tensor:
         """
         Resizes a given image (C, H, W) to the match at least one side in the destination size while keeping the aspect ratio.
         The shorter side is padded if needed. Padding is done to the right and bottom side of the input image.
         """
-        target_height, target_width = self.dest_size
-        height, width = img.shape[-2:]
-
-        height_scale = target_height / height
-        width_scale = target_width / width
-
-        scale_factor = min(height_scale, width_scale)
-
-        new_height = int(height * scale_factor)
-        new_width = int(width * scale_factor)
+        new_height, new_width = self._calc_new_height_width(img.shape)
 
         img = T_v2.functional.resize(img, [new_height, new_width])
 
         return self._pad_to_size(img)
+
+    def _calc_new_height_width(self, img_shape: torch.Size) -> torch.Size:
+        """
+        Calculates the new height and width (unpadded) for a given input shape. The new dimensions
+        have the same aspect ratio as the input.
+        """
+        target_height, target_width = self.dest_size
+        height, width = img_shape[-2:]
+
+        scale_factor = min(target_height / height, target_width / width)
+
+        new_height = int(scale_factor * height)
+        new_width = int(scale_factor * width)
+
+        return torch.Size((new_height, new_width))
 
     def _pad_to_size(self, img: torch.Tensor) -> torch.Tensor:
         """

@@ -20,6 +20,15 @@ class TestRTMDetPreprocessor:
 
         torch.testing.assert_close(img, target_img)
     
+    def test_process_bboxes(self) -> None:
+        bboxes = torch.tensor([[0.0, 0, 1, 1], [10, 10, 14, 14], [15, 20, 16, 24]])
+        img_shape = torch.Size((3, 16, 20))
+
+        bboxes = self.preprocessor.process_bboxes(bboxes, img_shape)
+        target = torch.tensor([[0.0, 0, 2, 2], [20, 20, 28, 28], [30, 40, 32, 48]])
+
+        torch.testing.assert_close(bboxes, target)
+
     def test_pad_to_size_1(self) -> None:
         img = torch.ones((3, 10, 40))
 
