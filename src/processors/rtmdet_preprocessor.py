@@ -20,7 +20,7 @@ class RTMDetPreprocessor:
 
         assert dest_size[0] % 32 == 0 and dest_size[1] % 32 == 0, "RTMDet requires that input dimensions are divisible by 32"
         
-        self.dest_size = dest_size
+        self.dest_size = torch.Size(dest_size)
         self.pad_color = pad_color
         self.normalize = T_v2.Normalize(mean, std)
     
@@ -38,7 +38,7 @@ class RTMDetPreprocessor:
         """
         Transform the bbox coordinates from the original image dimensions to the preprocessed image dimensions.
         bboxes: tensor of shape (n, 4) (x_min, y_min, x_max, y_max)
-        img_shape: tensor of shape (..., H, W). The original image's shape
+        img_shape: size of form (..., H, W). The original image's shape
         """
         height, width = img_shape[-2:]
         new_height, new_width = self._calc_new_height_width(img_shape)
