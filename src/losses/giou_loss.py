@@ -13,7 +13,6 @@ class GIoULoss(nn.Module):
         Calculates the loss between the given bounding boxes. Both inputs should be in shape (B, n, 4).
         Returns a tensor of shape (B, n).
         """
-        
         IoU, union = self.calc_IoU_and_union(boxes_1, boxes_2)
 
         enclosure_width = torch.maximum(boxes_1[...,-2], boxes_2[..., -2]) - torch.minimum(boxes_1[..., -4], boxes_2[..., -4])
@@ -26,8 +25,8 @@ class GIoULoss(nn.Module):
     def calc_IoU_and_union(self, boxes_1: torch.Tensor, boxes_2: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Calculates the IoU and union between two sets of bounding boxes so that the GIoU can be calculated.
-        Both inputs should be in shape (B, n, 4) and the calculations are done element wise.
-        Returns tensors of shape (B, n) (IoU, Union).
+        Both inputs should be in shape (..., 4) and the calculations are done element wise.
+        Returns tensors of shape (...), i.e., with one dimension less than the input. (IoU, Union).
         """
         I_width = torch.minimum(boxes_1[..., -2], boxes_2[..., -2]) - torch.maximum(boxes_1[..., -4], boxes_2[..., -4])
         I_width = torch.maximum(torch.tensor([0]), I_width)
@@ -41,7 +40,10 @@ class GIoULoss(nn.Module):
         boxes_2_area = torch.maximum(torch.tensor([0]), boxes_2_area)
 
         union = boxes_1_area + boxes_2_area - I_area
+        IoU = torch.zeros_like(union)
+        mask = union > 0
+        IoU[mask] = I_area[mask] / union[mask]
 
-        return I_area / union, union
+        return IoU, union
         
     
