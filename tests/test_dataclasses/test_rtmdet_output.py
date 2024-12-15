@@ -1,7 +1,6 @@
 import torch
 
 from tests.utils import create_model_output_1
-from src.dataclasses.rtmdet_output import RTMDetOutput
 
 
 class TestRTMDetOutput:

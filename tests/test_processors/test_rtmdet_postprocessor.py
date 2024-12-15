@@ -2,7 +2,6 @@ import torch
 
 from tests.utils import create_model_output_1
 from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.dataclasses.rtmdet_output import RTMDetOutput
 from src.processors.rtmdet_postprocessor import RTMDetPostprocessor
 
 

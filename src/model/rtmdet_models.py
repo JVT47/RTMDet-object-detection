@@ -1,4 +1,3 @@
-from enum import Enum
 import torch
 import torch.nn as nn
 
