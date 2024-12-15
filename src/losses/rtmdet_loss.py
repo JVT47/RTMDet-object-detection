@@ -35,8 +35,9 @@ class RTMDetLoss(nn.Module):
 
         mask = targets.bboxes.sum(dim=-1) != 0 
         n_positives = (mask).sum(dim=-1) # shape (B)
-        loss = torch.zeros((batch_size, n_preds))
+        n_positives[n_positives == 0] = 1
 
+        loss = torch.zeros((batch_size, n_preds))
         loss[mask] = self.reg_loss_weight * self.reg_loss(preds.bboxes[mask], targets.bboxes[mask])
 
         IoU, _ = self.reg_loss.calc_IoU_and_union(preds.bboxes, targets.bboxes)
