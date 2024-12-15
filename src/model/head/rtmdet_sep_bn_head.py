@@ -11,10 +11,11 @@ class RTMDetSepBNHead(nn.Module):
     """
     def __init__(self, widen_factor: float, num_classes: int, exp_on_reg: bool, *args, **kwargs) -> None:
         """
-        widen_factor: the factor by which the out_channels should be multiplied.
-        All factor should be relative to RTMDet large model. 
-        num_classes: the number of classes the model should predict.
-        exp_on_reg: if true applies the exponential funtion to the reg preds before multiplying by the out scale.
+        ## Args
+        - widen_factor: the factor by which the out_channels should be multiplied.
+        - All factor should be relative to the RTMDet large model. 
+        - num_classes: the number of classes the model should predict.
+        - exp_on_reg: if true applies the exponential function to the reg preds before multiplying by the out scale.
         """
         super().__init__(*args, **kwargs)
 

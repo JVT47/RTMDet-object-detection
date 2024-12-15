@@ -14,7 +14,8 @@ class RTMDetLoss(nn.Module):
     """
     def __init__(self, reg_loss_weight: float = 2, *args, **kwargs) -> None:
         """
-        reg_loss_weight: the weight of the regression loss. The weight for classification is 1.
+        ## Args
+        - reg_loss_weight: the weight of the regression loss. The weight for classification is 1.
         """
         super().__init__(*args, **kwargs)
 
@@ -25,8 +26,9 @@ class RTMDetLoss(nn.Module):
     
     def forward(self, model_output: RTMDetOutput, ground_truths: list[BBoxLabelContainer]) -> torch.Tensor:
         """
-        model_output: predictions made by the model
-        ground_truths: list of ground truth bboxes and labels for the batch. Should be in the same order as the model inputs.
+        ## Args
+        - model_output: predictions made by the model
+        - ground_truths: list of ground truth bboxes and labels for the batch. Should be in the same order as the model inputs.
         """
         targets = self.label_assigner.assign_targets(ground_truths, model_output)
         preds = model_output.process_and_combine_layers()

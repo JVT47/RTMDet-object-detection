@@ -9,7 +9,8 @@ class QualityFocalLoss(nn.Module):
     """
     def __init__(self, beta: float = 2, *args, **kwargs) -> None:
         """
-        beta: a scaling factor which in RTMDet is 2.
+        ## Args
+        - beta: a scaling factor which in RTMDet is 2.
         """
         super().__init__(*args, **kwargs)
 
@@ -17,9 +18,10 @@ class QualityFocalLoss(nn.Module):
     
     def forward(self, pred_label: torch.Tensor, target_label: torch.Tensor, IoU: torch.Tensor) -> torch.Tensor:
         """
-        pred_label: tensor of shape (B, n, c) or (n, c) where n is the number of predictions and c the number of classes.
-        target_label: tensor of shape (B, n, c) or (n, c). Usually the targets are one-hot encoded.
-        IoU: tensor of shape (B, n) or (n). The IoU score between the prediction and target. Used to calculate the soft label.
+        ## Args
+        - pred_label: tensor of shape (B, n, c) or (n, c) where n is the number of predictions and c the number of classes.
+        - target_label: tensor of shape (B, n, c) or (n, c). Usually the targets are one-hot encoded.
+        - IoU: tensor of shape (B, n) or (n). The IoU score between the prediction and target. Used to calculate the soft label.
         """
         soft_label = target_label * IoU.unsqueeze(-1)
         

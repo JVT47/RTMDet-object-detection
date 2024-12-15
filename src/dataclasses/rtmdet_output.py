@@ -54,9 +54,9 @@ class RTMDetOutput:
     def transform_reg_pred_to_bbox_pred(reg_pred: torch.Tensor, grid_points: torch.Tensor) -> torch.Tensor:
         """
         Transforms reg_pred from the model into bbox coordinates of the form (x_min, y_min, x_max, y_max)
-
-        reg_pred: tensor of shape (B, n, 4)
-        grid_points: tensor of shape (n, 2)
+        # Args
+        - reg_pred: tensor of shape (B, n, 4)
+        - grid_points: tensor of shape (n, 2)
         """
         batch_size, _, _ = reg_pred.shape
         bbox_pred = torch.cat([grid_points, grid_points], dim=-1)

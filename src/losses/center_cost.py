@@ -19,9 +19,11 @@ class CenterCost(nn.Module):
     
     def forward(self, gt_bbox: torch.Tensor, grid_points: torch.Tensor) -> torch.Tensor:
         """
-        gt_bbox: tensor of shape (4) in format (x_min, y_min, x_max, y_max).
-        grid_points: tensor of shape (n, 2) in (x, y) format.
-        Returns a tensor of shape (n)
+        ## Args
+        - gt_bbox: tensor of shape (4) in format (x_min, y_min, x_max, y_max).
+        - grid_points: tensor of shape (n, 2) in (x, y) format.
+        ## Returns
+        - a tensor of shape (n)
         """
         bbox_center = (gt_bbox[:2] + gt_bbox[2:]) / 2
 

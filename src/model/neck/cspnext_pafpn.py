@@ -10,9 +10,10 @@ class CSPNeXtPAFPN(nn.Module):
     """
     def __init__(self, widen_factor: float, deepen_factor: float, *args, **kwargs) -> None:
         """
-        widen_factor: the factor by which the out_channels should be multiplied.
-        deepen_factor: the factor by which the depth of the network should be multiplied. 
-        All factor should be relative to RTMDet large model. 
+        ## Args
+        - widen_factor: the factor by which the out_channels should be multiplied.
+        - deepen_factor: the factor by which the depth of the network should be multiplied. 
+        - All factors should be relative to RTMDet large model. 
         """
         super().__init__(*args, **kwargs)
 

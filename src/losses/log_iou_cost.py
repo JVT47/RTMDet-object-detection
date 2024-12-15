@@ -11,7 +11,8 @@ class LogIoUCost(nn.Module):
     
     def forward(self, IoU: torch.Tensor) -> torch.Tensor:
         """
-        IoU: tensor of shape (n). Should contain the IoU score between the target bbox and bbox predictions.
+        ## Args
+        - IoU: tensor of shape (n). Should contain the IoU score between the target bbox and bbox predictions.
         """
         loss = -torch.log(IoU)
         

@@ -15,8 +15,9 @@ class RTMDetLabelAssigner:
     """
     def __init__(self, q: int = 20) -> None:
         """
-        q: hyperparameter that determines how many of the biggest IoU scores should be
-           added together to achieve the top k number in simOTA.
+        ## Args
+        - q: hyperparameter that determines how many of the biggest IoU scores should be
+             added together to achieve the top k number in simOTA.
         """
         self.q = q
         self.cls_cost = QualityFocalLoss()
@@ -54,14 +55,16 @@ class RTMDetLabelAssigner:
 
     def simOTA(self, ground_truths: BBoxLabelContainer, predictions: BBoxLabelContainer, grid_points: torch.Tensor) -> torch.Tensor:
         """
-        gt_bboxes: tensor of shape (m, 4) where m is the number of labeled bounding boxes. BBoxes should
-                   be in form (x_min, y_min, x_max, y_max).
-        gt_labels: tensor of shape (m, c) where c is the number of classes that the model should predict.
-                   The labels should be one-hot encoded.
-        grid_points: tensor of shape (n, 2) where n is the number of predictions made by the model
-        pred_labels: tensor of shape (n, c). Predictions should be in the probability form, i.e., each element in [0, 1]
-        pred_bboxes: tensor of shape (n, 4). BBoxes should be in form (x_min, y_min, x_max, y_max)
-        Returns a tensor of shape (m, n)
+        ## Args
+        - gt_bboxes: tensor of shape (m, 4) where m is the number of labeled bounding boxes. BBoxes should
+                     be in form (x_min, y_min, x_max, y_max).
+        - gt_labels: tensor of shape (m, c) where c is the number of classes that the model should predict.
+                     The labels should be one-hot encoded.
+        - grid_points: tensor of shape (n, 2) where n is the number of predictions made by the model
+        - pred_labels: tensor of shape (n, c). Predictions should be in the probability form, i.e., each element in [0, 1]
+        - pred_bboxes: tensor of shape (n, 4). BBoxes should be in form (x_min, y_min, x_max, y_max)
+        ## Returns
+        - a tensor of shape (m, n)
         """
         m, _ = ground_truths.bboxes.shape
         n, _ = predictions.bboxes.shape
@@ -90,9 +93,9 @@ class RTMDetLabelAssigner:
         Makes sure that the assigner matrix is feasible, i.e., each column sum is at most one. Note that this implementation 
         guarantees that each grid point predicts at most one ground truth but it is possible that some ground truth gets no 
         grid points assigned to it. However, in practice this should be extremely rare.
-
-        assigner_matrix: tensor of shape (m, n). m = number of ground truths, n = number of predictions
-        cost_matrix: tensor of shape (m, n) with the calculated cost values.
+        ## Args
+        - assigner_matrix: tensor of shape (m, n). m = number of ground truths, n = number of predictions
+        - cost_matrix: tensor of shape (m, n) with the calculated cost values.
         """
         column_mask = assigner_matrix.sum(dim=0) > 1
         row_mask = cost_matrix.argmin(dim=0)[column_mask]

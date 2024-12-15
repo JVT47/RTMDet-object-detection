@@ -16,10 +16,11 @@ class RTMDetPostprocessor:
     """
     def __init__(self, score_threshold: float = 0.5, iou_threshold: float = 0.5, *args, **kwargs) -> None:
         """
-        score_threshold: the minimum confidence score that a detection should have. All predictions with a lower score are 
-                         classified as background.
-        iou_threshold: the maximum IoU that two detections from the same class are allowed to have. Used in NMS to 
-                       filter out duplicates.
+        ## Args
+        - score_threshold: the minimum confidence score that a detection should have. All predictions with a lower score are 
+                           classified as background.
+        - iou_threshold: the maximum IoU that two detections from the same class are allowed to have. Used in NMS to 
+                         filter out duplicates.
         """
         super().__init__(*args, **kwargs)
 
@@ -61,9 +62,10 @@ class RTMDetPostprocessor:
     def bbox_to_original_image(bboxes: torch.Tensor, preprocess_shape: torch.Size, orig_img_shape: torch.Size) -> torch.Tensor:
         """
         Transforms bboxes in the preprocessed image shape back to the original image dimensions.
-        bboxes: tensor of shape (n, 4)
-        preprocess_shape: Size of form (..., H_1, W_1). Shape of preprocessed images
-        orig_img_shape: Size of form (..., H_2, W_2). Shape of the original image.
+        ## Args
+        - bboxes: tensor of shape (n, 4)
+        - preprocess_shape: Size of form (..., H_1, W_1). Shape of preprocessed images
+        - orig_img_shape: Size of form (..., H_2, W_2). Shape of the original image.
         """
         orig_height, orig_width = orig_img_shape[-2:]
         pre_height, pre_width = preprocess_shape[-2:]

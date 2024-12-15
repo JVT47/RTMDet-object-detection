@@ -11,10 +11,11 @@ class RTMDetPreprocessor:
                  mean: list[float] = [103.53, 116.28, 123.675], std: list[float] = [57.375, 57.12, 58.395],
                  *args, **kwargs) -> None:
         """
-        dest_size: the (H, W) output dimensions of the preprocessed images
-        pad_color: the color used for potential padded regions
-        mean: list of means used to normalize the input image. Default values from mmdet RMTDet implementation
-        std: list of stds used to normalize the input image. Default values from mmdet RTMDet implementation
+        ## Args
+        - dest_size: the (H, W) output dimensions of the preprocessed images
+        - pad_color: the color used for potential padded regions
+        - mean: list of means used to normalize the input image. Default values from mmdet RMTDet implementation
+        - std: list of stds used to normalize the input image. Default values from mmdet RTMDet implementation
         """
         super().__init__(*args, **kwargs)
 
@@ -37,8 +38,9 @@ class RTMDetPreprocessor:
     def process_bboxes(self, bboxes: torch.Tensor, img_shape: torch.Size) -> torch.Tensor:
         """
         Transform the bbox coordinates from the original image dimensions to the preprocessed image dimensions.
-        bboxes: tensor of shape (n, 4) (x_min, y_min, x_max, y_max)
-        img_shape: size of form (..., H, W). The original image's shape
+        ## Args
+        - bboxes: tensor of shape (n, 4) (x_min, y_min, x_max, y_max)
+        - img_shape: size of form (..., H, W). The original image's shape
         """
         height, width = img_shape[-2:]
         new_height, new_width = self._calc_new_height_width(img_shape)

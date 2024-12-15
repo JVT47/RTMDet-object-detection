@@ -6,10 +6,11 @@ from .rtmdet_models import RTMDetTiny, RTMDetS, RTMDetM, RTMDetL, RTMDetX
 
 def make_model(model_name: str, num_classes: int, model_weights: str | None, eval: bool = True) -> nn.Module:
     """
-    model_name: name of the model, e.g., 'RTMDetTiny'
-    num_classes: the number of classes that the model should predict.
-    model_weights: path to the model weight file. If none no weihgts are loaded.
-    eval: bool that tells if the model should be set to eval mode. 
+    ## Args
+    - model_name: name of the model, e.g., 'RTMDetTiny'
+    - num_classes: the number of classes that the model should predict.
+    - model_weights: path to the model weight file. If None, no weights are loaded.
+    - eval: bool that tells if the model should be set to eval mode. 
     """
     model = None
     if model_name == "RTMDetTiny":
