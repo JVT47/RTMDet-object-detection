@@ -44,7 +44,8 @@ class RTMDetLabelAssigner:
     
     def assign_targets_for_batch_element(self, element_gts: BBoxLabelContainer, element_preds: BBoxLabelContainer, grid_points: torch.Tensor) -> BBoxLabelContainer:
         n, num_classes = element_preds.labels.shape
-        target = BBoxLabelContainer(torch.zeros((n, 4)), torch.zeros((n, num_classes), dtype=torch.long))
+        target = BBoxLabelContainer(torch.zeros((n, 4)), torch.zeros((n, num_classes)))
+        element_gts = BBoxLabelContainer(element_gts.bboxes.float(), element_gts.labels.float())
 
         assigner_matrix = self.simOTA(element_gts, element_preds, grid_points)
         for i, mask in enumerate(assigner_matrix):

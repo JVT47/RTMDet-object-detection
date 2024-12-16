@@ -40,7 +40,7 @@ class TestRTMDetLabelAssigner:
 
         torch.testing.assert_close(assigner_matrix, target)
     
-    def test_assign_targets_to_batch_elements(self) -> None:
+    def test_assign_targets_to_batch_element(self) -> None:
         element_gts = BBoxLabelContainer(torch.tensor([[0.0, 0, 1, 1], [7, 7, 9, 9]]), torch.tensor([[0, 0, 1], [1, 0, 0]]))
         bbox_pred = torch.tensor([[0.0, 0.0, 1, 1], [0.5, 0.0, 1, 1], [15, -1, 16, 2], [0, 8, 1, 9], [7.5, 7, 9, 9], [16, 8, 17, 9]])
         label_pred = torch.tensor([[0.1, 0.6, 0.9], [0.2, 0.3, 0.8], [0.5, 0.3, 0.2], [0.1, 0.2, 0.3], [0.7, 0.2, 0.2], [0.05, 0.4, 0.3]])
@@ -49,7 +49,7 @@ class TestRTMDetLabelAssigner:
 
         targets = self.label_assigner.assign_targets_for_batch_element(element_gts, element_preds, grid_points)
         target_bboxes = torch.tensor([[0.0, 0, 1, 1], [0, 0, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0], [7, 7, 9, 9], [0, 0, 0, 0]])
-        target_labels = torch.tensor([[0, 0, 1], [0, 0, 1], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]])
+        target_labels = torch.tensor([[0.0, 0, 1], [0, 0, 1], [0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 0]])
 
         torch.testing.assert_close(targets.bboxes, target_bboxes)
         torch.testing.assert_close(targets.labels, target_labels)
@@ -63,7 +63,7 @@ class TestRTMDetLabelAssigner:
         target_bboxes = torch.zeros((2, 21, 4))
         target_bboxes[0, 5] = torch.tensor([7.5, 7, 8.5, 8])
         target_bboxes[1, 19] = torch.tensor([16, 15.5, 17, 17])
-        target_labels = torch.zeros((2, 21, 3), dtype=torch.long)
+        target_labels = torch.zeros((2, 21, 3))
         target_labels[0, 5] = torch.tensor([0, 0, 1])
         target_labels[1, 19] = torch.tensor([1, 0, 0])
 
