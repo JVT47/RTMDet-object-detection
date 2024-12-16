@@ -54,7 +54,7 @@ def main() -> None:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     batch_size = 4
 
-    model_weights = "model_weights/RTMDetL-original-weights.pth"
+    model_weights = "model_weights/RTMDetL-coco.pth"
     model = make_model(model_name="RTMDetL", num_classes=80, model_weights=model_weights, eval=True)
     preprocessor = RTMDetPreprocessor(dest_size=(448, 800))
     postprocessor = RTMDetPostprocessor()
