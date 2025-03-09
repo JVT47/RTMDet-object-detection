@@ -12,6 +12,7 @@ class RTMDetLoss(nn.Module):
     """
     The loss function for RTMDet models. Takes care of label assignment.
     """
+
     def __init__(self, reg_loss_weight: float = 2, *args, **kwargs) -> None:
         """
         ## Args
@@ -23,8 +24,10 @@ class RTMDetLoss(nn.Module):
         self.cls_loss = QualityFocalLoss()
         self.reg_loss = GIoULoss()
         self.label_assigner = RTMDetLabelAssigner()
-    
-    def forward(self, model_output: RTMDetOutput, ground_truths: list[BBoxLabelContainer]) -> torch.Tensor:
+
+    def forward(
+        self, model_output: RTMDetOutput, ground_truths: list[BBoxLabelContainer]
+    ) -> torch.Tensor:
         """
         ## Args
         - model_output: predictions made by the model
@@ -35,12 +38,14 @@ class RTMDetLoss(nn.Module):
 
         batch_size, n_preds = preds.bboxes.shape[0:2]
 
-        mask = targets.bboxes.sum(dim=-1) != 0 
-        n_positives = (mask).sum(dim=-1) # shape (B)
+        mask = targets.bboxes.sum(dim=-1) != 0
+        n_positives = (mask).sum(dim=-1)  # shape (B)
         n_positives[n_positives == 0] = 1
 
         loss = torch.zeros((batch_size, n_preds))
-        loss[mask] = self.reg_loss_weight * self.reg_loss(preds.bboxes[mask], targets.bboxes[mask])
+        loss[mask] = self.reg_loss_weight * self.reg_loss(
+            preds.bboxes[mask], targets.bboxes[mask]
+        )
 
         IoU, _ = self.reg_loss.calc_IoU_and_union(preds.bboxes, targets.bboxes)
         loss += self.cls_loss(preds.labels, targets.labels, IoU)
@@ -48,4 +53,3 @@ class RTMDetLoss(nn.Module):
         loss = loss.sum(dim=1) * 1 / n_positives
 
         return loss.sum()
-    

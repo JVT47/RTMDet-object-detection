@@ -5,12 +5,13 @@ from .backbone.cspnext import CSPNeXt
 from .neck.cspnext_pafpn import CSPNeXtPAFPN
 from .head.rtmdet_sep_bn_head import RTMDetSepBNHead
 from src.dataclasses.rtmdet_output import RTMDetOutput
-    
+
 
 class RTMDetTiny(nn.Module):
     """
     RTMDet tiny model.
     """
+
     def __init__(self, num_classes: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -31,6 +32,7 @@ class RTMDetS(nn.Module):
     """
     RTMDet small model.
     """
+
     def __init__(self, num_classes: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -51,6 +53,7 @@ class RTMDetM(nn.Module):
     """
     RTMDet medium model.
     """
+
     def __init__(self, num_classes: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -71,6 +74,7 @@ class RTMDetL(nn.Module):
     """
     RTMDet large model.
     """
+
     def __init__(self, num_classes: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -91,6 +95,7 @@ class RTMDetX(nn.Module):
     """
     RTMDet xl model.
     """
+
     def __init__(self, num_classes: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
