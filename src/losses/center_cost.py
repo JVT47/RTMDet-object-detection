@@ -7,6 +7,7 @@ class CenterCost(nn.Module):
     The center cost function used in RTMDet paper. Used to quantify the closeness
     of grid points and a ground truth bbox.
     """
+
     def __init__(self, alpha: float = 10, beta: float = 3, *args, **kwargs) -> None:
         """
         alpha and beta are hyperparameters for the loss. See RTMDet paper for details:
@@ -16,7 +17,7 @@ class CenterCost(nn.Module):
 
         self.alpha = alpha
         self.beta = beta
-    
+
     def forward(self, gt_bbox: torch.Tensor, grid_points: torch.Tensor) -> torch.Tensor:
         """
         ## Args
@@ -31,6 +32,3 @@ class CenterCost(nn.Module):
         cost = torch.pow(self.alpha, dist - self.beta)
 
         return cost
-
-
-

@@ -5,11 +5,18 @@ import torchvision.transforms.v2 as T_v2
 class RTMDetPreprocessor:
     """
     Preprocessor that takes an input image tensor, resizes and normalizes
-    it for inference. 
+    it for inference.
     """
-    def __init__(self, dest_size: tuple[int, int], pad_color: list[float] = [114, 114, 114],
-                 mean: list[float] = [103.53, 116.28, 123.675], std: list[float] = [57.375, 57.12, 58.395],
-                 *args, **kwargs) -> None:
+
+    def __init__(
+        self,
+        dest_size: tuple[int, int],
+        pad_color: list[float] = [114, 114, 114],
+        mean: list[float] = [103.53, 116.28, 123.675],
+        std: list[float] = [57.375, 57.12, 58.395],
+        *args,
+        **kwargs,
+    ) -> None:
         """
         ## Args
         - dest_size: the (H, W) output dimensions of the preprocessed images
@@ -19,12 +26,14 @@ class RTMDetPreprocessor:
         """
         super().__init__(*args, **kwargs)
 
-        assert dest_size[0] % 32 == 0 and dest_size[1] % 32 == 0, "RTMDet requires that input dimensions are divisible by 32"
-        
+        assert dest_size[0] % 32 == 0 and dest_size[1] % 32 == 0, (
+            "RTMDet requires that input dimensions are divisible by 32"
+        )
+
         self.dest_size = torch.Size(dest_size)
         self.pad_color = pad_color
         self.normalize = T_v2.Normalize(mean, std)
-    
+
     def process_image(self, img: torch.Tensor) -> torch.Tensor:
         """
         Preprocesses the input tensor (C, H, W) (RGB).
@@ -35,7 +44,9 @@ class RTMDetPreprocessor:
 
         return img
 
-    def process_bboxes(self, bboxes: torch.Tensor, img_shape: torch.Size) -> torch.Tensor:
+    def process_bboxes(
+        self, bboxes: torch.Tensor, img_shape: torch.Size
+    ) -> torch.Tensor:
         """
         Transform the bbox coordinates from the original image dimensions to the preprocessed image dimensions.
         ## Args
@@ -49,7 +60,7 @@ class RTMDetPreprocessor:
         bboxes *= torch.tensor([new_width, new_height, new_width, new_height])
 
         return bboxes
-    
+
     def resize_with_aspect_ratio(self, img: torch.Tensor) -> torch.Tensor:
         """
         Resizes a given image (C, H, W) to the match at least one side in the destination size while keeping the aspect ratio.
@@ -78,8 +89,8 @@ class RTMDetPreprocessor:
 
     def _pad_to_size(self, img: torch.Tensor) -> torch.Tensor:
         """
-        Pads a given image (C, H, W) to the destination size (H_dest, W_dest) with the given pad color. Padding is done to the 
-        right and bottom of the image. 
+        Pads a given image (C, H, W) to the destination size (H_dest, W_dest) with the given pad color. Padding is done to the
+        right and bottom of the image.
         """
         target_height, target_width = self.dest_size
         height, width = img.shape[-2:]
@@ -87,4 +98,6 @@ class RTMDetPreprocessor:
         pad_right = max(0, target_width - width)
         pad_bottom = max(0, target_height - height)
 
-        return T_v2.functional.pad(img, [0, 0, pad_right, pad_bottom], fill=self.pad_color)
+        return T_v2.functional.pad(
+            img, [0, 0, pad_right, pad_bottom], fill=self.pad_color
+        )

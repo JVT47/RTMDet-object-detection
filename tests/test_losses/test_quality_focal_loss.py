@@ -15,7 +15,7 @@ class TestQualityFocalLoss:
         target = torch.tensor([0.265, 2.200])
 
         torch.testing.assert_close(loss, target, atol=1e-2, rtol=0.0)
-    
+
     def test_forward_batch(self) -> None:
         pred_label = torch.tensor([[0.5, 0.8, 0.2], [0.4, 0.9, 0.1]])
         pred_label = torch.stack([pred_label, pred_label])
