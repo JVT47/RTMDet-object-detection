@@ -21,6 +21,7 @@
         "pointwise",
         "poolings",
         "preds",
+        "Pytest",
         "rtmdet",
         "rtol",
         "SPPF",
