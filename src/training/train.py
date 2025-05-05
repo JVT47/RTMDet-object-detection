@@ -1,4 +1,3 @@
-from pathlib import Path
 import torch
 import torch.nn as nn
 from torch.optim import Optimizer
@@ -8,6 +7,7 @@ from src.model.model import make_model
 from src.datasets.dataset_factory import get_dataloader
 from src.losses.loss_fn_factory import get_loss_fn
 from src.training.optimizer_factory import get_optimizer
+from src.training.training_config import TrainingConfig
 
 
 def train_one_epoch(
@@ -22,12 +22,11 @@ def train_one_epoch(
     """
     model.train()
     running_loss = 0.0
-    n_samples = 0
 
     for data in training_dataloader:
         optimizer.zero_grad()
 
-        images, gts = data[0].to(device), data[1].to(device)
+        images, gts = data[0].to(device), data[1]
 
         rtmdet_output = model(images)
 
@@ -37,9 +36,8 @@ def train_one_epoch(
         optimizer.step()
 
         running_loss += loss.item()
-        n_samples += images.shape[0]
 
-    return running_loss / n_samples
+    return running_loss / len(training_dataloader)
 
 
 def validate(
@@ -54,55 +52,38 @@ def validate(
     with torch.inference_mode():
         model.eval()
         running_loss = 0.0
-        n_samples = 0
 
         for data in validation_dataloader:
-            images, gts = data[0].to(device), data[1].to(device)
+            images, gts = data[0].to(device), data[1]
 
             rtmdet_output = model(images)
 
             loss: torch.Tensor = rtmdet_loss(rtmdet_output, gts)
             running_loss += loss.item()
-            n_samples += images.shape[0]
 
-        return running_loss / n_samples
+        return running_loss / len(validation_dataloader)
 
 
-def train_model(
-    model_config: dict,
-    training_dataloader_config: dict,
-    validation_dataloader_config: dict,
-    loss_fn_config: dict,
-    optimizer_config: dict,
-    weights_save_path: Path,
-    session_name: str,
-    epochs: int,
-    device: torch.device,
-) -> None:
+def train_model(training_config: TrainingConfig) -> None:
     """
     ## Args
-        - model_config: contains arguments for the model factory
-        - training_config: contains arguments for the dataloader factory. Used for optimization
-        - validation_config: contains arguments for the dataloader factory. Used in validation
-        - loss_fn_config: contains arguments for the loss_fn factory
-        - optimizer_config: contains arguments for the optimizer factory. Should not contain model parameters
-        - weights_save_dir_path: dir where the model weights file is saved
-        - session_name: name for the training session. Used as the filename for model weights. .pth suffix added automatically
-        - epoch: number of epoch to train for
-        - device: device used for training
+        - training_config: dict containing the required fields to configure model training
     """
-    model = make_model(**model_config)
+    model = make_model(**training_config.model_cfg)
+    device = torch.device(training_config.device)
     model.to(device)
 
-    training_dataloader = get_dataloader(**training_dataloader_config)
-    validation_dataloader = get_dataloader(**validation_dataloader_config)
+    training_dataloader = get_dataloader(**training_config.training_dataloader_config)
+    validation_dataloader = get_dataloader(
+        **training_config.validation_dataloader_config
+    )
 
-    loss = get_loss_fn(**loss_fn_config)
-    optimizer = get_optimizer(model, **optimizer_config)
+    loss = get_loss_fn(**training_config.loss_fn_config)
+    optimizer = get_optimizer(model, **training_config.optimizer_config)
 
     best_validation_loss = float("inf")
-    for i in range(epochs):
-        print(f"Epoch {i + 1} / {epochs}")
+    for i in range(training_config.epochs):
+        print(f"Epoch {i + 1} / {training_config.epochs}")
 
         training_mean_loss = train_one_epoch(
             model, training_dataloader, optimizer, loss, device
@@ -115,5 +96,7 @@ def train_model(
 
         if validation_mean_loss < best_validation_loss:
             best_validation_loss = validation_mean_loss
-            weights_path = weights_save_path.joinpath(f"{session_name}.pth")
+            weights_path = training_config.weights_save_path.joinpath(
+                f"{training_config.session_name}.pth"
+            )
             torch.save(model.state_dict(), weights_path)
