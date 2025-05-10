@@ -11,7 +11,13 @@ class RTMDetSepBNHead(nn.Module):
     """
 
     def __init__(
-        self, widen_factor: float, num_classes: int, exp_on_reg: bool, *args, **kwargs
+        self,
+        widen_factor: float,
+        num_classes: int,
+        exp_on_reg: bool,
+        *args,
+        raw_output: bool = False,
+        **kwargs,
     ) -> None:
         """
         ## Args
@@ -19,10 +25,13 @@ class RTMDetSepBNHead(nn.Module):
         - All factor should be relative to the RTMDet large model.
         - num_classes: the number of classes the model should predict.
         - exp_on_reg: if true applies the exponential function to the reg preds before multiplying by the out scale.
+        - raw_output: if true returns outputs as a tuple of classification output tuple and regression output tuple instead of the
+                      RTMDetOutput class. Used when converting to onnx.
         """
         super().__init__(*args, **kwargs)
 
         self.exp_on_reg = exp_on_reg
+        self.raw_output = raw_output
         self.cls_convs = nn.ModuleList(
             [
                 *[
@@ -103,7 +112,13 @@ class RTMDetSepBNHead(nn.Module):
 
     def forward(
         self, x: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
-    ) -> RTMDetOutput:
+    ) -> (
+        RTMDetOutput
+        | tuple[
+            tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+            tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+        ]
+    ):
         cls_scores = []
         reg_preds = []
         for i, out_scale in enumerate([8, 16, 32]):  # Output scales for bbox regression
@@ -119,5 +134,7 @@ class RTMDetSepBNHead(nn.Module):
 
             cls_scores.append(cls_score)
             reg_preds.append(reg_pred)
+        if self.raw_output:
+            return tuple(cls_scores), tuple(reg_preds)
 
         return RTMDetOutput(tuple(cls_scores), tuple(reg_preds))
