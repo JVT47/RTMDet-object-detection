@@ -116,7 +116,7 @@ impl Detections {
                     let center_x = x as f32 * scale;
                     let center_y = y as f32 * scale;
                     let top_left = (center_x - reg[[0, y, x]], center_y - reg[[1, y, x]]);
-                    let bottom_right = (center_x + reg[[2, y, x]], center_y + reg[[3, x, y]]);
+                    let bottom_right = (center_x + reg[[2, y, x]], center_y + reg[[3, y, x]]);
 
                     bboxes.push(BBox {
                         top_left,
