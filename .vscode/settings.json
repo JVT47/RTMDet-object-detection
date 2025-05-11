@@ -19,10 +19,13 @@
         "Hardsigmoid",
         "havanese",
         "IIIT",
+        "Itertools",
         "leonberger",
         "meshgrid",
         "mmdet",
         "mmdetection",
+        "ndarray",
+        "ndarrays",
         "PAFPN",
         "pointwise",
         "poolings",
@@ -46,4 +49,7 @@
     "python.testing.pytestEnabled": true,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    }
 }
