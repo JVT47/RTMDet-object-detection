@@ -1,6 +1,6 @@
 pub mod bbox;
-pub mod detections;
-use detections::Detections;
+pub mod detection_result;
+use detection_result::DetectionResult;
 use ndarray::{Array4, ArrayView3, s};
 
 fn get_batch_element(array: &Array4<f32>, index: usize) -> ArrayView3<f32> {
@@ -11,12 +11,12 @@ pub fn postprocess_outputs(
     outputs: Vec<Array4<f32>>,
     score_threshold: f32,
     iou_threshold: f32,
-) -> Vec<Detections> {
+) -> Vec<DetectionResult> {
     let (num_batches, _, _, _) = outputs[0].dim();
 
     let mut result = vec![];
     for i in 0..num_batches {
-        result.push(Detections::new(
+        result.push(DetectionResult::new(
             (
                 get_batch_element(&outputs[0], i),
                 get_batch_element(&outputs[1], i),

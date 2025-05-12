@@ -2,7 +2,7 @@ mod inference;
 pub mod inference_config;
 
 use crate::{
-    postprocessing::{bbox::BBox, detections::Detections, postprocess_outputs},
+    postprocessing::{bbox::BBox, detection_result::DetectionResult, postprocess_outputs},
     preprocessing::preprocess_image,
 };
 use image::{DynamicImage, GenericImageView};
@@ -29,7 +29,7 @@ impl InferenceEngine {
         Ok(Self { session, config })
     }
 
-    pub fn detect_from_images(&self, images: Vec<DynamicImage>) -> Vec<Detections> {
+    pub fn detect_from_images(&self, images: Vec<DynamicImage>) -> Vec<DetectionResult> {
         let original_shapes = get_original_shapes(&images);
 
         let images_iter = images.iter().map(|image| {
@@ -45,7 +45,11 @@ impl InferenceEngine {
 
             let model_outputs = run_inference(&self.session, batch).unwrap();
 
-            detections.extend(postprocess_outputs(model_outputs, 0.5, 0.3));
+            detections.extend(postprocess_outputs(
+                model_outputs,
+                self.config.score_threshold,
+                self.config.iou_threshold,
+            ));
         }
 
         for (detections, original_shape) in detections.iter_mut().zip(original_shapes.iter()) {

@@ -8,7 +8,7 @@ use pyo3::{
 
 use crate::{
     inference_engine::{InferenceEngine, inference_config::InferenceConfig},
-    postprocessing::detections::Detections,
+    postprocessing::detection_result::DetectionResult,
 };
 
 #[pyclass]
@@ -19,11 +19,20 @@ pub struct RTMDetDetector {
 #[pymethods]
 impl RTMDetDetector {
     #[new]
-    pub fn new(model_path: &str, inference_shape: (u32, u32), batch_size: usize) -> PyResult<Self> {
+    #[pyo3(signature = (model_path, inference_shape, batch_size, score_threshold=0.5, iou_threshold=0.3))]
+    pub fn new(
+        model_path: &str,
+        inference_shape: (u32, u32),
+        batch_size: usize,
+        score_threshold: f32,
+        iou_threshold: f32,
+    ) -> PyResult<Self> {
         let config = InferenceConfig {
             input_width: inference_shape.0,
             input_height: inference_shape.1,
             batch_size,
+            score_threshold,
+            iou_threshold,
         };
 
         let engine = InferenceEngine::new(model_path, config)
@@ -36,7 +45,7 @@ impl RTMDetDetector {
         &self,
         py: Python<'_>,
         arrays: Vec<Py<PyArrayDyn<u8>>>,
-    ) -> PyResult<Vec<Detections>> {
+    ) -> PyResult<Vec<DetectionResult>> {
         let mut images = Vec::with_capacity(arrays.len());
 
         for array in arrays {
