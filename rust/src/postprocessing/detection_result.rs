@@ -3,13 +3,18 @@ use pyo3::pyclass;
 
 use super::bbox::BBox;
 
+/// A struct that holds all of the detected bounding boxes for an image
 #[pyclass]
 pub struct DetectionResult {
+    /// A vec of the detected bounding boxes
     #[pyo3(get)]
     pub bboxes: Vec<BBox>,
 }
 
 impl DetectionResult {
+    /// Creates a detection result from the given model predictions for the given image.
+    /// The detection result contains a vector of bounding boxes sorted by score in
+    /// descending order.
     pub fn new(
         cls_preds: (ArrayView3<f32>, ArrayView3<f32>, ArrayView3<f32>),
         reg_preds: (ArrayView3<f32>, ArrayView3<f32>, ArrayView3<f32>),
@@ -42,6 +47,8 @@ impl DetectionResult {
         Self { bboxes }
     }
 
+    /// Extract the bounding boxes from the model output layer that exceed
+    /// the score threshold
     fn extract_bboxes(
         cls: &ArrayView3<f32>,
         reg: &ArrayView3<f32>,
@@ -82,6 +89,9 @@ impl DetectionResult {
         bboxes
     }
 
+    /// Performs non maximum suppression to the given bounding boxes
+    /// Return a vector of the selected bounding boxes sorted by
+    /// score in descending order
     fn nms(mut bboxes: Vec<BBox>, iou_threshold: f32) -> Vec<BBox> {
         bboxes.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
 
@@ -108,4 +118,59 @@ impl DetectionResult {
 
 fn sigmoid(x: f32) -> f32 {
     1.0 / (1.0 + (-x).exp())
+}
+
+#[cfg(test)]
+mod tests {
+    use ndarray::{Array3, CowArray};
+
+    use super::*;
+
+    #[test]
+    fn test_new_returns_correct_bboxes() {
+        let mut cls1 = Array3::<f32>::ones((3, 4, 4)) * -1.0;
+        cls1.slice_mut(s![.., 1, 1])
+            .assign(&CowArray::from(&[0.0, 10.0, 5.0]));
+        let mut cls2 = Array3::<f32>::ones((3, 2, 2)) * -1.0;
+        cls2.slice_mut(s![.., 1, 1])
+            .assign(&CowArray::from(&[1.0, 0.0, -10.0]));
+        let cls3 = Array3::<f32>::ones((3, 1, 1)) * -1.0;
+
+        let mut reg1 = Array3::<f32>::zeros((4, 4, 4));
+        reg1.slice_mut(s![.., 1, 1])
+            .assign(&CowArray::from(&[1.0, 1.0, 0.0, 0.0])); // bbox [7, 7, 8, 8]
+        let mut reg2 = Array3::<f32>::zeros((4, 2, 2));
+        reg2.slice_mut(s![.., 1, 1])
+            .assign(&CowArray::from(&[0.0, 0.0, 1.0, 1.0])); // bbox [16, 16, 17, 17]
+        let reg3 = Array3::<f32>::zeros((4, 1, 1));
+
+        let detection_result = DetectionResult::new(
+            ((&cls1).into(), (&cls2).into(), (&cls3).into()),
+            ((&reg1).into(), (&reg2).into(), (&reg3).into()),
+            0.5,
+            0.3,
+        );
+
+        let target_bboxes = vec![
+            BBox {
+                top_left: (7.0, 7.0),
+                bottom_right: (8.0, 8.0),
+                class_num: 1,
+                score: 0.999,
+            },
+            BBox {
+                top_left: (16.0, 16.0),
+                bottom_right: (17.0, 17.0),
+                class_num: 0,
+                score: 0.731,
+            },
+        ];
+
+        for (bbox, target) in detection_result.bboxes.iter().zip(&target_bboxes) {
+            assert_eq!(bbox.top_left, target.top_left);
+            assert_eq!(bbox.bottom_right, target.bottom_right);
+            assert_eq!(bbox.class_num, target.class_num);
+            assert!((bbox.score - target.score).abs() < 0.001);
+        }
+    }
 }
