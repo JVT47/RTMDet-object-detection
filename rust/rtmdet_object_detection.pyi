@@ -30,7 +30,7 @@ class BBox:
         The probability confidence of the detected class.
         """
 
-class DetectionResult:
+class DetectionOutput:
     """
     A class for holding the bounding box detections for an image.
     """
@@ -53,6 +53,9 @@ class RTMDetDetector:
         batch_size: int,
         score_threshold: float = 0.5,
         iou_threshold: float = 0.3,
+        padding_color: tuple[int, int, int] = (114, 114, 114),
+        color_mean: tuple[float, float, float] = (103.53, 116.28, 123.675),
+        color_std: tuple[float, float, float] = (57.375, 57.12, 58.395),
     ) -> None:
         """
         ## Args:
@@ -61,11 +64,14 @@ class RTMDetDetector:
             - batch_size: The number of images inserted to the model at the same time.
             - score_threshold: The minimum score required for a valid detection
             - iou_threshold: the maximum iou score allowed in nms for detections of the same class.
+            - padding_color: the rgb values used to pad possible empty space in preprocessing
+            - color_mean: the rgb mean values used in normalization in preprocessing
+            - color_std: the rgb std values used in normalization in preprocessing
         """
 
     def detect_from_numpy(
         self, arrays: list[np.ndarray[Any, np.dtype[np.uint8]]]
-    ) -> list[DetectionResult]:
+    ) -> list[DetectionOutput]:
         """
         Performs object detection for the given numpy images.
 

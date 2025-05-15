@@ -2,7 +2,8 @@ mod inference;
 pub mod inference_config;
 
 use crate::{
-    postprocessing::{bbox::BBox, detection_result::DetectionResult, postprocess_outputs},
+    errors::RTMDetResult,
+    postprocessing::{bbox::BBox, detection_output::DetectionOutput, postprocess_outputs},
     preprocessing::preprocess_image,
 };
 use image::{DynamicImage, GenericImageView};
@@ -29,21 +30,26 @@ impl InferenceEngine {
         Ok(Self { session, config })
     }
 
-    pub fn detect_from_images(&self, images: Vec<DynamicImage>) -> Vec<DetectionResult> {
+    pub fn detect_from_images(
+        &self,
+        images: Vec<DynamicImage>,
+    ) -> RTMDetResult<Vec<DetectionOutput>> {
         let original_shapes = get_original_shapes(&images);
 
-        let images_iter = images.iter().map(|image| {
-            preprocess_image(image, self.config.input_width, self.config.input_height)
-        });
+        let images_iter = images
+            .iter()
+            .map(|image| preprocess_image(image, &self.config.preprocess_config));
 
         let mut detections = Vec::with_capacity(images.len());
 
         for chunk in &images_iter.chunks(self.config.batch_size) {
-            let batch_images = chunk.collect_vec();
+            let batch_images_result: RTMDetResult<Vec<_>> = chunk.into_iter().collect();
+            let batch_images = batch_images_result?;
             let batch_views: Vec<_> = batch_images.iter().map(|image| image.view()).collect();
-            let batch = concatenate(Axis(0), &batch_views).unwrap();
 
-            let model_outputs = run_inference(&self.session, batch).unwrap();
+            let batch = concatenate(Axis(0), &batch_views)?;
+
+            let model_outputs = run_inference(&self.session, batch)?;
 
             detections.extend(postprocess_outputs(
                 model_outputs,
@@ -56,11 +62,14 @@ impl InferenceEngine {
             rescale_bbox_to_original_image(
                 &mut detections.bboxes,
                 *original_shape,
-                (self.config.input_width, self.config.input_height),
+                (
+                    self.config.preprocess_config.input_width,
+                    self.config.preprocess_config.input_height,
+                ),
             );
         }
 
-        detections
+        Ok(detections)
     }
 }
 

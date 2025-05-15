@@ -7,8 +7,11 @@ use pyo3::{
 };
 
 use crate::{
-    inference_engine::{InferenceEngine, inference_config::InferenceConfig},
-    postprocessing::detection_result::DetectionResult,
+    inference_engine::{
+        InferenceEngine,
+        inference_config::{InferenceConfig, PreprocessConfig},
+    },
+    postprocessing::detection_output::DetectionOutput,
 };
 
 #[pyclass]
@@ -19,17 +22,26 @@ pub struct RTMDetDetector {
 #[pymethods]
 impl RTMDetDetector {
     #[new]
-    #[pyo3(signature = (model_path, inference_shape, batch_size, score_threshold=0.5, iou_threshold=0.3))]
+    #[pyo3(signature = (model_path, inference_shape, batch_size, score_threshold=0.5, iou_threshold=0.3, 
+        padding_color=[114, 114, 144], color_mean=[103.53, 116.28, 123.675], color_std=[57.375, 57.12, 58.395]))]
     pub fn new(
         model_path: &str,
         inference_shape: (u32, u32),
         batch_size: usize,
         score_threshold: f32,
         iou_threshold: f32,
+        padding_color: [u8; 3],
+        color_mean: [f32; 3],
+        color_std: [f32; 3],
     ) -> PyResult<Self> {
         let config = InferenceConfig {
-            input_width: inference_shape.0,
-            input_height: inference_shape.1,
+            preprocess_config: PreprocessConfig {
+                input_width: inference_shape.0,
+                input_height: inference_shape.1,
+                padding_color,
+                color_mean,
+                color_std,
+            },
             batch_size,
             score_threshold,
             iou_threshold,
@@ -45,7 +57,7 @@ impl RTMDetDetector {
         &self,
         py: Python<'_>,
         arrays: Vec<Py<PyArrayDyn<u8>>>,
-    ) -> PyResult<Vec<DetectionResult>> {
+    ) -> PyResult<Vec<DetectionOutput>> {
         let mut images = Vec::with_capacity(arrays.len());
 
         for array in arrays {
@@ -57,7 +69,7 @@ impl RTMDetDetector {
 
         let detections = self.engine.detect_from_images(images);
 
-        Ok(detections)
+        detections.map_err(|_ | PyRuntimeError::new_err("Inference failed"))
     }
 }
 

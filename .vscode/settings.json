@@ -44,6 +44,7 @@
         "sphynx",
         "SPPF",
         "stds",
+        "thiserror",
         "unpadded"
     ],
     "python.testing.pytestArgs": [

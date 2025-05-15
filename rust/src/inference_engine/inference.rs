@@ -1,28 +1,27 @@
 use ndarray::{Array4, CowArray, Ix4};
 use ort::{Session, Value};
 
+use crate::errors::RTMDetResult;
+
 pub fn run_inference(
     session: &Session,
     input_array: Array4<f32>,
-) -> Result<Vec<Array4<f32>>, String> {
+) -> RTMDetResult<Vec<Array4<f32>>> {
     let array = CowArray::from(input_array.into_dyn());
-    let input_value = Value::from_array(session.allocator(), &array).unwrap();
+    let input_value = Value::from_array(session.allocator(), &array)?;
 
-    let model_outputs = session.run(vec![input_value]).unwrap();
+    let model_outputs = session.run(vec![input_value])?;
 
-    Ok(extract_model_outputs(model_outputs))
+    extract_model_outputs(model_outputs)
 }
 
-fn extract_model_outputs(model_outputs: Vec<Value<'static>>) -> Vec<Array4<f32>> {
+fn extract_model_outputs(model_outputs: Vec<Value<'static>>) -> RTMDetResult<Vec<Array4<f32>>> {
     model_outputs
         .iter()
         .map(|out| {
-            out.try_extract::<f32>()
-                .unwrap()
-                .view()
-                .to_owned()
-                .into_dimensionality::<Ix4>()
-                .unwrap()
+            let array = out.try_extract::<f32>()?;
+            let array4 = array.view().to_owned().into_dimensionality::<Ix4>()?;
+            Ok(array4)
         })
-        .collect()
+        .collect::<RTMDetResult<Vec<_>>>()
 }

@@ -5,13 +5,13 @@ use super::bbox::BBox;
 
 /// A struct that holds all of the detected bounding boxes for an image
 #[pyclass]
-pub struct DetectionResult {
+pub struct DetectionOutput {
     /// A vec of the detected bounding boxes
     #[pyo3(get)]
     pub bboxes: Vec<BBox>,
 }
 
-impl DetectionResult {
+impl DetectionOutput {
     /// Creates a detection result from the given model predictions for the given image.
     /// The detection result contains a vector of bounding boxes sorted by score in
     /// descending order.
@@ -23,26 +23,26 @@ impl DetectionResult {
     ) -> Self {
         let mut bboxes = vec![];
 
-        bboxes.extend(DetectionResult::extract_bboxes(
+        bboxes.extend(DetectionOutput::extract_bboxes(
             &cls_preds.0,
             &reg_preds.0,
             8.0,
             score_threshold,
         ));
-        bboxes.extend(DetectionResult::extract_bboxes(
+        bboxes.extend(DetectionOutput::extract_bboxes(
             &cls_preds.1,
             &reg_preds.1,
             16.0,
             score_threshold,
         ));
-        bboxes.extend(DetectionResult::extract_bboxes(
+        bboxes.extend(DetectionOutput::extract_bboxes(
             &cls_preds.2,
             &reg_preds.2,
             32.0,
             score_threshold,
         ));
 
-        bboxes = DetectionResult::nms(bboxes, iou_threshold);
+        bboxes = DetectionOutput::nms(bboxes, iou_threshold);
 
         Self { bboxes }
     }
@@ -144,7 +144,7 @@ mod tests {
             .assign(&CowArray::from(&[0.0, 0.0, 1.0, 1.0])); // bbox [16, 16, 17, 17]
         let reg3 = Array3::<f32>::zeros((4, 1, 1));
 
-        let detection_result = DetectionResult::new(
+        let detection_result = DetectionOutput::new(
             ((&cls1).into(), (&cls2).into(), (&cls3).into()),
             ((&reg1).into(), (&reg2).into(), (&reg3).into()),
             0.5,
