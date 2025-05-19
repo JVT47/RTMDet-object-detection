@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "numpy>=2.1.3",
+    "onnx>=1.17.0",
+    "onnxruntime>=1.21.1",
+    "onnxscript>=0.2.5",
     "pyaml>=25.1.0",
     "pydantic>=2.11.4",
     "torch>=2.5.1",
