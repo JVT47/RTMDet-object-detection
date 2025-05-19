@@ -1,0 +1,43 @@
+# Example on how the training config file could look like 
+define: &num_classes 37
+define: &input_size [480, 480]
+
+train_config:
+  model_cfg:
+    model_name: "RTMDetTiny"
+    num_classes: *num_classes 
+    model_weights: # model_weights/RTMDetTiny-coco.pth
+
+  training_dataloader_config:
+    dataset_configs:
+      - name: "OxfordPetDataset"
+        config:
+          annotations_file_path: data/annotations/train.yaml
+          image_dir_path: data/images
+          preprocessor_config:
+            dest_size: *input_size
+          num_classes: *num_classes
+  
+  validation_dataloader_config:
+    dataset_configs:
+      - name: "OxfordPetDataset"
+        config:
+          annotations_file_path: data/annotations/valid.yaml
+          image_dir_path: data/images
+          preprocessor_config:
+            dest_size: *input_size
+          num_classes: *num_classes
+  
+  loss_fn_config:
+    name: "RTMDetLoss"
+    config: 
+      reg_loss_weight: 2
+  
+  optimizer_config:
+    name: "AdamW"
+    config:
+
+  session_name: "test"
+  weights_save_path: model_weights/trained
+  epochs: 80
+  device: "cpu"
