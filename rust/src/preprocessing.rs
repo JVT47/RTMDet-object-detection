@@ -31,7 +31,7 @@ pub fn preprocess_image(
             (r as f32 - config.color_mean[0]) / config.color_std[0];
         result[[0, 1, y as usize, x as usize]] =
             (g as f32 - config.color_mean[1]) / config.color_std[1];
-        result[[0, 1, y as usize, x as usize]] =
+        result[[0, 2, y as usize, x as usize]] =
             (b as f32 - config.color_mean[2]) / config.color_std[2];
     }
 
@@ -58,7 +58,7 @@ fn resize_and_pad(
 mod tests {
     use super::*;
     use image::{DynamicImage, RgbImage};
-    use ndarray::Array3;
+    use ndarray::{Array3, s};
 
     #[test]
     fn test_resize_and_pad_returns_correct_array() {
@@ -77,5 +77,29 @@ mod tests {
 
         assert_eq!(output.width(), target_width);
         assert_eq!(output.height(), target_height);
+    }
+
+    #[test]
+    fn test_preprocess_image_resizes_and_normalizes_correctly() {
+        let config = PreprocessConfig {
+            input_width: 32,
+            input_height: 32,
+            padding_color: [2, 2, 2],
+            color_mean: [2.0, 2.0, 2.0],
+            color_std: [2.0, 2.0, 2.0],
+        };
+
+        let img_buffer =
+            RgbImage::from_raw(10, 5, Array3::ones((10, 5, 3)).into_raw_vec()).unwrap();
+
+        let image = DynamicImage::ImageRgb8(img_buffer);
+
+        let output = preprocess_image(&image, &config).unwrap();
+
+        let img_slice = output.slice(s![.., .., 0..16, ..]);
+        let padding_slice = output.slice(s![.., .., 16.., ..]);
+
+        assert!(img_slice.iter().all(|&x| x == -0.5));
+        assert!(padding_slice.iter().all(|&x| x == 0.0));
     }
 }
