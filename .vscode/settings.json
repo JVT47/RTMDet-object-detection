@@ -19,14 +19,21 @@
         "Hardsigmoid",
         "havanese",
         "IIIT",
+        "Itertools",
         "leonberger",
         "meshgrid",
         "mmdet",
         "mmdetection",
+        "ndarray",
+        "ndarrays",
+        "numpy",
         "PAFPN",
         "pointwise",
         "poolings",
         "preds",
+        "pyclass",
+        "pymethods",
+        "pymodule",
         "Pytest",
         "ragdoll",
         "rtmdet",
@@ -37,6 +44,7 @@
         "sphynx",
         "SPPF",
         "stds",
+        "thiserror",
         "unpadded"
     ],
     "python.testing.pytestArgs": [
@@ -46,4 +54,7 @@
     "python.testing.pytestEnabled": true,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    }
 }
