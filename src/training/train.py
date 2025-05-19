@@ -4,10 +4,19 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
 from src.model.model import make_model
+from src.dataclasses.bbox_label_container import BBoxLabelContainer
 from src.datasets.dataset_factory import get_dataloader
 from src.losses.loss_fn_factory import get_loss_fn
 from src.training.optimizer_factory import get_optimizer
 from src.training.training_config import TrainingConfig
+
+
+def gts_to_device(
+    gts: list[BBoxLabelContainer], device: torch.device
+) -> list[BBoxLabelContainer]:
+    return [
+        BBoxLabelContainer(gt.bboxes.to(device), gt.labels.to(device)) for gt in gts
+    ]
 
 
 def train_one_epoch(
@@ -26,7 +35,7 @@ def train_one_epoch(
     for data in training_dataloader:
         optimizer.zero_grad()
 
-        images, gts = data[0].to(device), data[1]
+        images, gts = data[0].to(device), gts_to_device(data[1], device)
 
         rtmdet_output = model(images)
 
@@ -54,7 +63,7 @@ def validate(
         running_loss = 0.0
 
         for data in validation_dataloader:
-            images, gts = data[0].to(device), data[1]
+            images, gts = data[0].to(device), gts_to_device(data[1], device)
 
             rtmdet_output = model(images)
 
