@@ -1,3 +1,10 @@
+"""
+Starts the model training based on the given config file.
+
+Example usage:
+- uv run -m scripts.train_model --config-file path/to/config
+"""
+
 from argparse import ArgumentParser
 from pathlib import Path
 

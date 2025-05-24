@@ -52,6 +52,7 @@ def main() -> None:
     dummy_input = torch.zeros((1, 3, 640, 640))
 
     save_dir_path = Path("model_weights", "onnx")
+    save_dir_path.mkdir(parents=True, exist_ok=True)
 
     torch.onnx.export(
         model,

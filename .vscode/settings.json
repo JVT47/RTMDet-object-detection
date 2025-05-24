@@ -27,6 +27,7 @@
         "ndarray",
         "ndarrays",
         "numpy",
+        "ONNX",
         "PAFPN",
         "pointwise",
         "poolings",
@@ -35,6 +36,7 @@
         "pymethods",
         "pymodule",
         "Pytest",
+        "PYTHONPATH",
         "ragdoll",
         "rtmdet",
         "rtol",
@@ -45,7 +47,8 @@
         "SPPF",
         "stds",
         "thiserror",
-        "unpadded"
+        "unpadded",
+        "xmls"
     ],
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "${workspaceFolder}/src"
