@@ -4,8 +4,10 @@ import torch.nn as nn
 from .quality_focal_loss import QualityFocalLoss
 from .giou_loss import GIoULoss
 from .rtmdet_label_assigner import RTMDetLabelAssigner
-from src.dataclasses.rtmdet_output import RTMDetOutput
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
+from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
 
 
 class RTMDetLoss(nn.Module):

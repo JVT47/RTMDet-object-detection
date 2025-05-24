@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import torch
 
-from src.model.model import make_model
+from rtmdet_object_detection_dev.model.model import make_model
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 import torch
 
-from src.losses.giou_loss import GIoULoss
+from rtmdet_object_detection_dev.losses.giou_loss import GIoULoss
 
 
 class TestGIoULoss:

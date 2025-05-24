@@ -1,6 +1,6 @@
 import torch
 
-from src.losses.log_iou_cost import LogIoUCost
+from rtmdet_object_detection_dev.losses.log_iou_cost import LogIoUCost
 
 
 class TestLogIoUCost:

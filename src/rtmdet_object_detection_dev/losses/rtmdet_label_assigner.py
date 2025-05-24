@@ -1,11 +1,13 @@
 import torch
 import torchvision
 
-from src.losses.quality_focal_loss import QualityFocalLoss
-from src.losses.log_iou_cost import LogIoUCost
-from src.losses.center_cost import CenterCost
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.dataclasses.rtmdet_output import RTMDetOutput
+from rtmdet_object_detection_dev.losses.quality_focal_loss import QualityFocalLoss
+from rtmdet_object_detection_dev.losses.log_iou_cost import LogIoUCost
+from rtmdet_object_detection_dev.losses.center_cost import CenterCost
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
+from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
 
 
 class RTMDetLabelAssigner:

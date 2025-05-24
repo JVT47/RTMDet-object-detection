@@ -3,12 +3,14 @@ import torch.nn as nn
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
-from src.model.model import make_model
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.datasets.dataset_factory import get_dataloader
-from src.losses.loss_fn_factory import get_loss_fn
-from src.training.optimizer_factory import get_optimizer
-from src.training.training_config import TrainingConfig
+from rtmdet_object_detection_dev.model.model import make_model
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
+from rtmdet_object_detection_dev.datasets.dataset_factory import get_dataloader
+from rtmdet_object_detection_dev.losses.loss_fn_factory import get_loss_fn
+from rtmdet_object_detection_dev.training.optimizer_factory import get_optimizer
+from rtmdet_object_detection_dev.training.training_config import TrainingConfig
 
 
 def gts_to_device(

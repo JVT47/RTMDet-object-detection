@@ -1,6 +1,6 @@
 import torch
 
-from src.dataclasses.rtmdet_output import RTMDetOutput
+from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
 
 
 def create_model_output_1() -> RTMDetOutput:

@@ -1,8 +1,10 @@
 import torch
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
 
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.datasets.oxford_pets_dataset import OxfordPetDataset
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
+from rtmdet_object_detection_dev.datasets.oxford_pets_dataset import OxfordPetDataset
 
 
 def get_dataset(name: str, config: dict) -> Dataset:

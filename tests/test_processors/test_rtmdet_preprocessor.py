@@ -1,6 +1,8 @@
 import torch
 
-from src.processors.rtmdet_preprocessor import RTMDetPreprocessor
+from rtmdet_object_detection_dev.processors.rtmdet_preprocessor import (
+    RTMDetPreprocessor,
+)
 
 
 class TestRTMDetPreprocessor:

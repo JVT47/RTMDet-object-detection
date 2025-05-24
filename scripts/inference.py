@@ -9,10 +9,14 @@ import torch
 import torchvision
 from typing import Generator, Iterable
 
-from src.dataclasses.detection_result import DetectionResult
-from src.model.model import make_model
-from src.processors.rtmdet_preprocessor import RTMDetPreprocessor
-from src.processors.rtmdet_postprocessor import RTMDetPostprocessor
+from rtmdet_object_detection_dev.dataclasses.detection_result import DetectionResult
+from rtmdet_object_detection_dev.model.model import make_model
+from rtmdet_object_detection_dev.processors.rtmdet_preprocessor import (
+    RTMDetPreprocessor,
+)
+from rtmdet_object_detection_dev.processors.rtmdet_postprocessor import (
+    RTMDetPostprocessor,
+)
 
 
 def batch_image_files(
