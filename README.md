@@ -17,5 +17,5 @@ Inference:
 - install all required dependencies
 - download RTMDetL-coco.pth weights to model_weights
 - mkdir images
-- run python -m scripts.inference
+- run python -m scripts.inference_python
 - results should appear in images/results 
