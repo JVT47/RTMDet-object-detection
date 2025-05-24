@@ -1,9 +1,11 @@
 import torch
 import torchvision
 
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.dataclasses.detection_result import DetectionResult
-from src.dataclasses.rtmdet_output import RTMDetOutput
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
+from rtmdet_object_detection_dev.dataclasses.detection_result import DetectionResult
+from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
 
 
 class RTMDetPostprocessor:

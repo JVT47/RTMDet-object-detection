@@ -1,5 +1,9 @@
 """
 Script used to convert xml annotations for the Oxford-IIIT Pet Dataset into train, test, and valid yaml files.
+
+Example usage:
+- uv run -m scripts.oxford_pet_dataset_xmls_to_yaml --xmls-dir data/annotations/xmls
+    --save-dir-path data/annotations
 """
 
 from argparse import ArgumentParser

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from ..basic_components import ConvModule
-from src.dataclasses.rtmdet_output import RTMDetOutput
+from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
 
 
 class RTMDetSepBNHead(nn.Module):

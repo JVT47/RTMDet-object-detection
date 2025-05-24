@@ -4,8 +4,12 @@ from torch.utils.data import Dataset
 from torchvision.io.image import decode_image
 import yaml
 
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.processors.rtmdet_preprocessor import RTMDetPreprocessor
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
+from rtmdet_object_detection_dev.processors.rtmdet_preprocessor import (
+    RTMDetPreprocessor,
+)
 
 
 class OxfordPetDataset(Dataset):

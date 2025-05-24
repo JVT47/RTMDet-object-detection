@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import torch
 
-from src.model.model import make_model
+from rtmdet_object_detection_dev.model.model import make_model
 
 
 def main() -> None:
@@ -52,6 +52,7 @@ def main() -> None:
     dummy_input = torch.zeros((1, 3, 640, 640))
 
     save_dir_path = Path("model_weights", "onnx")
+    save_dir_path.mkdir(parents=True, exist_ok=True)
 
     torch.onnx.export(
         model,

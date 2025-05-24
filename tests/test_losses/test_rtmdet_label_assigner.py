@@ -1,7 +1,9 @@
 import torch
 
-from src.dataclasses.bbox_label_container import BBoxLabelContainer
-from src.losses.rtmdet_label_assigner import RTMDetLabelAssigner
+from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
+    BBoxLabelContainer,
+)
+from rtmdet_object_detection_dev.losses.rtmdet_label_assigner import RTMDetLabelAssigner
 from tests.utils import create_model_output_1
 
 

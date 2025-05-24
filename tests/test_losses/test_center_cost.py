@@ -1,6 +1,6 @@
 import torch
 
-from src.losses.center_cost import CenterCost
+from rtmdet_object_detection_dev.losses.center_cost import CenterCost
 
 
 class TestCenterCost:

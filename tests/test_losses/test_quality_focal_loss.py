@@ -1,6 +1,6 @@
 import torch
 
-from src.losses.quality_focal_loss import QualityFocalLoss
+from rtmdet_object_detection_dev.losses.quality_focal_loss import QualityFocalLoss
 
 
 class TestQualityFocalLoss:

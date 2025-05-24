@@ -1,9 +1,16 @@
+"""
+Starts the model training based on the given config file.
+
+Example usage:
+- uv run -m scripts.train_model --config-file path/to/config
+"""
+
 from argparse import ArgumentParser
 from pathlib import Path
 
-from src.config_loader import load_yaml_file
-from src.training.train import train_model
-from src.training.training_config import TrainingConfig
+from rtmdet_object_detection_dev.config_loader import load_yaml_file
+from rtmdet_object_detection_dev.training.train import train_model
+from rtmdet_object_detection_dev.training.training_config import TrainingConfig
 
 
 def main() -> None:
