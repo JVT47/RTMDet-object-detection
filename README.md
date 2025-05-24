@@ -51,6 +51,8 @@ uv run -m scripts.train_model --config-file path/to/config/file
 ### Config file 
 The config file for training defines the fields that are passed to the corresponding factories in the code. This way one can configure multiple training runs without having to change the source code. See configs/RTMDer_training_config.template.yaml for an example how the config file should look like. See the factory methods in the source code for details on their arguments.
 
+In model_cfg, if you set strict to false, you can use pretrained RTMDet weights with a different number of output classes as your models initial weights since make model takes care of resizing mismatching shapes automatically. See src/rtmdet_object_detection_dev/model/model.py for details.
+
 ### Dataset
 As an example, I have used the Oxford-IIT Pet Dataset (https://www.robots.ox.ac.uk/~vgg/data/pets/). If you want to use your own dataset just add a dataset implementation to src/rtmdet_object_detection_dev/datasets and add it to the dataset_factory.py. The rest of this subsection covers the Oxford-IIT Pet Dataset.
 
