@@ -9,7 +9,8 @@ train_config:
   model_cfg:
     model_name: "RTMDetTiny"
     num_classes: *num_classes 
-    model_weights: # model_weights/RTMDetTiny-coco.pth
+    model_weights: model_weights/RTMDetTiny-coco.pth
+    strict: false
 
   training_dataloader_config:
     dataset_configs:
