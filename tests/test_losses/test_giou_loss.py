@@ -6,7 +6,7 @@ from rtmdet_object_detection_dev.losses.giou_loss import GIoULoss
 class TestGIoULoss:
     giou_loss = GIoULoss()
 
-    def test_calc_iou_and_union_1(self) -> None:
+    def test_calc_iou_and_union_returns_correct_iou_and_union_scores_1(self) -> None:
         bboxes_1 = torch.tensor(
             [[[0.0, 0, 1, 1], [1, 1, 2, 2]], [[0, 0, 1, 2], [1, 1, 2, 2]]]
         )
@@ -21,7 +21,7 @@ class TestGIoULoss:
         torch.testing.assert_close(iou, target_iou)
         torch.testing.assert_close(union, target_union)
 
-    def test_calc_iou_and_union_2(self) -> None:
+    def test_calc_iou_and_union_returns_correct_iou_and_union_scores(self) -> None:
         bboxes_1 = torch.tensor([[12.0, 12, 12, 12], [0, 0, 1, 1]])
         bboxes_2 = torch.tensor([[13.0, 13, 13, 13], [14, 14, 14, 14]])
 
@@ -32,7 +32,7 @@ class TestGIoULoss:
         torch.testing.assert_close(iou, target_iou)
         torch.testing.assert_close(union, target_union)
 
-    def test_forward(self) -> None:
+    def test_forward_returns_correct_loss(self) -> None:
         bboxes_1 = torch.tensor(
             [[[0.0, 0, 2, 1], [1, 1, 2, 2]], [[0, 0, 1, 2], [1, 1, 2, 2]]]
         )

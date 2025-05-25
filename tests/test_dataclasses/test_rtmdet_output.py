@@ -6,7 +6,7 @@ from tests.utils import create_model_output_1
 class TestRTMDetOutput:
     model_output = create_model_output_1()
 
-    def test_create_model_grid_points(self) -> None:
+    def test_create_model_grid_points_returns_correct_points(self) -> None:
         grid_points = self.model_output.create_model_grid_points()
 
         target = torch.tensor(
@@ -37,7 +37,7 @@ class TestRTMDetOutput:
 
         torch.testing.assert_close(grid_points, target)
 
-    def test_transform_reg_pred_to_bbox_pred(self) -> None:
+    def test_transform_reg_pred_to_bbox_pred_returns_correct_bboxes(self) -> None:
         reg_pred = torch.tensor(
             [[[1, 1, 0, 0], [0, 0, 2, 2]], [[1, 1, 1, 1], [2, 2, 2, 2]]]
         )

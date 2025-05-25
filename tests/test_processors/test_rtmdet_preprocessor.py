@@ -13,7 +13,7 @@ class TestRTMDetPreprocessor:
         std=[1, 1, 1],
     )
 
-    def test_process_image(self) -> None:
+    def test_process_image_returns_preprocessed_image(self) -> None:
         img = torch.ones((3, 32, 32)) * torch.tensor([0, 10, 20]).reshape((3, 1, 1))
         img = self.preprocessor.process_image(img)
 
@@ -26,7 +26,7 @@ class TestRTMDetPreprocessor:
 
         torch.testing.assert_close(img, target_img)
 
-    def test_process_bboxes(self) -> None:
+    def test_process_bboxes_returns_correct_bboxes(self) -> None:
         bboxes = torch.tensor([[0.0, 0, 1, 1], [10, 10, 14, 14], [15, 20, 16, 24]])
         img_shape = torch.Size((3, 16, 20))
 
@@ -35,7 +35,7 @@ class TestRTMDetPreprocessor:
 
         torch.testing.assert_close(bboxes, target)
 
-    def test_pad_to_size_1(self) -> None:
+    def test_pad_to_size_pads_image_correctly_1(self) -> None:
         img = torch.ones((3, 10, 40))
 
         target_img = torch.ones((3, 32, 64)) * torch.Tensor(
@@ -47,7 +47,7 @@ class TestRTMDetPreprocessor:
 
         torch.testing.assert_close(img, target_img)
 
-    def test_pad_to_size_2(self) -> None:
+    def test_pad_to_size_pads_image_correctly_2(self) -> None:
         img = torch.ones((3, 10, 5))
 
         target_img = torch.ones((3, 32, 64)) * torch.Tensor(
@@ -59,7 +59,7 @@ class TestRTMDetPreprocessor:
 
         torch.testing.assert_close(img, target_img)
 
-    def test_resize_with_aspect_ratio_1(self) -> None:
+    def test_resize_with_aspect_ratio_resizes_correctly_1(self) -> None:
         img = torch.ones((3, 10, 40))
 
         target_img = torch.ones((3, 32, 64)) * torch.tensor(
@@ -71,7 +71,7 @@ class TestRTMDetPreprocessor:
 
         torch.testing.assert_close(img, target_img)
 
-    def test_resize_with_aspect_ratio_2(self) -> None:
+    def test_resize_with_aspect_ratio_resizes_correctly_2(self) -> None:
         img = torch.ones((3, 32, 16))
         img = self.preprocessor.resize_with_aspect_ratio(img)
 
