@@ -10,7 +10,7 @@ from tests.utils import create_model_output_1
 class TestRTMDetLabelAssigner:
     label_assigner = RTMDetLabelAssigner(q=20)
 
-    def test_make_assigner_matrix_feasible(self) -> None:
+    def test_make_assigner_matrix_feasible_removes_duplicate_assignments(self) -> None:
         assigner_matrix = torch.tensor(
             [[1, 0, 1], [0, 1, 1], [1, 1, 1]], dtype=torch.bool
         )
@@ -21,7 +21,7 @@ class TestRTMDetLabelAssigner:
 
         torch.testing.assert_close(assigner_matrix, target)
 
-    def test_simOTA_1(self) -> None:
+    def test_simOTA_returns_correct_assigner_matrix_1(self) -> None:
         ground_truths = BBoxLabelContainer(
             torch.tensor([[0.0, 0, 1, 1], [7, 7, 9, 9]]),
             torch.tensor([[0, 0, 1], [1, 0, 0]]),
@@ -58,7 +58,7 @@ class TestRTMDetLabelAssigner:
 
         torch.testing.assert_close(assigner_matrix, target)
 
-    def test_simOTA_2(self) -> None:
+    def test_simOTA_returns_correct_assigner_matrix_2(self) -> None:
         ground_truths = BBoxLabelContainer(
             torch.tensor([[0.0, 0, 1, 1], [7, 7, 9, 9]]),
             torch.tensor([[0, 0, 1], [1, 0, 0]]),
@@ -95,7 +95,9 @@ class TestRTMDetLabelAssigner:
 
         torch.testing.assert_close(assigner_matrix, target)
 
-    def test_assign_targets_to_batch_element(self) -> None:
+    def test_assign_targets_to_batch_element_assigns_correct_bboxes_and_labels(
+        self,
+    ) -> None:
         element_gts = BBoxLabelContainer(
             torch.tensor([[0.0, 0, 1, 1], [7, 7, 9, 9]]),
             torch.tensor([[0, 0, 1], [1, 0, 0]]),
@@ -143,7 +145,7 @@ class TestRTMDetLabelAssigner:
         torch.testing.assert_close(targets.bboxes, target_bboxes)
         torch.testing.assert_close(targets.labels, target_labels)
 
-    def test_assign_targets(self) -> None:
+    def test_assign_targets_assigns_correct_bboxes_and_labels(self) -> None:
         model_output = create_model_output_1()
         gt_1 = BBoxLabelContainer(
             torch.tensor([[7.5, 7, 8.5, 8]]), torch.tensor([[0, 0, 1]])

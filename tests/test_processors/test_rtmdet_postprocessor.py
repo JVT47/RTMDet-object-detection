@@ -15,7 +15,7 @@ class TestRTMDetPostprocessor:
         iou_threshold=0.5,
     )
 
-    def test_perform_nms(self) -> None:
+    def test_perform_nms_keeps_correct_detections(self) -> None:
         bboxes = torch.tensor([[0.0, 0, 3, 2], [1.0, 0, 3, 2], [0.0, 3, 1, 4]])
         classes = torch.tensor([1, 1, 2])
         scores = torch.tensor([0.6, 0.55, 0.8])
@@ -41,7 +41,7 @@ class TestRTMDetPostprocessor:
         torch.testing.assert_close(detection_result.classes, torch.tensor([0, 2]))
         torch.testing.assert_close(detection_result.scores, torch.tensor([0.8, 0.9]))
 
-    def test_process_batch(self) -> None:
+    def test_process_batch_returns_correct_detections(self) -> None:
         model_output = create_model_output_1()
 
         detection_results = self.postprocessor.process_batch(model_output)
@@ -62,7 +62,7 @@ class TestRTMDetPostprocessor:
             detection_results[1].scores, torch.tensor([1.0]), atol=1e-3, rtol=0.0
         )
 
-    def test_bbox_to_original_image(self) -> None:
+    def test_bbox_to_original_image_rescales_bboxes_correctly(self) -> None:
         bboxes = torch.tensor([[0.0, 0, 2, 2], [20, 20, 28, 28], [30, 40, 32, 48]])
         preprocess_shape = torch.Size((32, 64))
         orig_img_shape = torch.Size((16, 24))

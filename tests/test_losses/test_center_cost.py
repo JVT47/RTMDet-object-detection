@@ -6,7 +6,7 @@ from rtmdet_object_detection_dev.losses.center_cost import CenterCost
 class TestCenterCost:
     center_cost = CenterCost(alpha=10, beta=1)
 
-    def test_forward(self) -> None:
+    def test_forward_returns_correct_loss(self) -> None:
         gt_bbox = torch.tensor([0, 0, 2, 2])
         grid_points = torch.tensor([[0, 0], [1, 0], [0, 1], [1, 1]])
 

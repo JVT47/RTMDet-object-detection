@@ -10,7 +10,7 @@ from tests.utils import create_model_output_1, create_model_output_2
 class TestRTMDetLoss:
     loss = RTMDetLoss(reg_loss_weight=2)
 
-    def test_forward_1(self) -> None:
+    def test_forward_returns_correct_loss_1(self) -> None:
         model_output = create_model_output_1()
         gt_1 = BBoxLabelContainer(
             torch.tensor([[7.5, 7, 8.5, 8]]), torch.tensor([[0, 0, 1]])
@@ -26,7 +26,7 @@ class TestRTMDetLoss:
 
         torch.testing.assert_close(loss, target, atol=1e-2, rtol=0)
 
-    def test_forward_2(self) -> None:
+    def test_forward_returns_correct_loss_2(self) -> None:
         model_output = create_model_output_2()
         gt_1 = BBoxLabelContainer(
             torch.tensor([[0.5, 6, 1, 8]]), torch.tensor([[1, 0]])
