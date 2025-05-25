@@ -13,11 +13,6 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with: 
-          python-version: "3.12"
-    
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -31,7 +26,7 @@ jobs:
           python-version-file: ".python-version" 
         
       - name: Install the project
-        run: uv sync --all-extras --dev
+        run: uv sync --dev
         
       - name: Run tests
         run: uv run pytest tests
