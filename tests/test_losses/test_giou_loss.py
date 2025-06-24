@@ -7,12 +7,8 @@ class TestGIoULoss:
     giou_loss = GIoULoss()
 
     def test_calc_iou_and_union_returns_correct_iou_and_union_scores_1(self) -> None:
-        bboxes_1 = torch.tensor(
-            [[[0.0, 0, 1, 1], [1, 1, 2, 2]], [[0, 0, 1, 2], [1, 1, 2, 2]]]
-        )
-        bboxes_2 = torch.tensor(
-            [[[0.0, 0, 1, 2], [1, 1, 2, 2]], [[0, 0, 1, 1], [1, 1, 3, 3]]]
-        )
+        bboxes_1 = torch.tensor([[[0.0, 0, 1, 1], [1, 1, 2, 2]], [[0, 0, 1, 2], [1, 1, 2, 2]]])
+        bboxes_2 = torch.tensor([[[0.0, 0, 1, 2], [1, 1, 2, 2]], [[0, 0, 1, 1], [1, 1, 3, 3]]])
 
         iou, union = self.giou_loss.calc_IoU_and_union(bboxes_1, bboxes_2)
         target_iou = torch.tensor([[0.5, 1.0], [0.5, 0.25]])
@@ -33,12 +29,8 @@ class TestGIoULoss:
         torch.testing.assert_close(union, target_union)
 
     def test_forward_returns_correct_loss(self) -> None:
-        bboxes_1 = torch.tensor(
-            [[[0.0, 0, 2, 1], [1, 1, 2, 2]], [[0, 0, 1, 2], [1, 1, 2, 2]]]
-        )
-        bboxes_2 = torch.tensor(
-            [[[0.0, 0, 1, 2], [1, 1, 2, 2]], [[0, 0, 2, 1], [1, 1, 3, 3]]]
-        )
+        bboxes_1 = torch.tensor([[[0.0, 0, 2, 1], [1, 1, 2, 2]], [[0, 0, 1, 2], [1, 1, 2, 2]]])
+        bboxes_2 = torch.tensor([[[0.0, 0, 1, 2], [1, 1, 2, 2]], [[0, 0, 2, 1], [1, 1, 3, 3]]])
 
         loss = self.giou_loss(bboxes_1, bboxes_2)
         target = torch.tensor([[0.917, 0.0], [0.917, 0.75]])

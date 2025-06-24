@@ -1,19 +1,18 @@
-"""
-Script used to convert xml annotations for the Oxford-IIIT Pet Dataset into train, test, and valid yaml files.
+"""Script used to convert xml annotations for the Oxford-IIIT Pet Dataset into train, test, and valid yaml files.
 
 Example usage:
 - uv run -m scripts.oxford_pet_dataset_xmls_to_yaml --xmls-dir data/annotations/xmls
     --save-dir-path data/annotations
 """
 
-from argparse import ArgumentParser
-from pathlib import Path
 import random
 import re
 import xml.etree.ElementTree as ET
+from argparse import ArgumentParser
+from pathlib import Path
 from xml.etree.ElementTree import Element
-import yaml
 
+import yaml
 
 BREAD_IDS = {
     "abyssinian": 0,
@@ -57,12 +56,13 @@ BREAD_IDS = {
 
 
 def xml_to_dict(element: Element) -> dict | str:
+    """Convert xml to dict format."""
     result = {}
 
     for child in element:
         child_data = xml_to_dict(child)
         if child.tag == "object":
-            result[child.tag] = result.get(child.tag, []) + [child_data]
+            result[child.tag] = [*result.get(child.tag, []), child_data]
         else:
             result[child.tag] = child_data
 
@@ -74,14 +74,14 @@ def xml_to_dict(element: Element) -> dict | str:
 
 
 def get_breed_from_filename(filename: str) -> str:
+    """Extract the breed name from the filename."""
     pattern = r"^(.*?)_\d+\.jpg$"
 
     match = re.match(pattern, filename)
 
     if match is None:
-        raise RuntimeError(
-            f"Could not match pattern: {pattern} to filename: {filename}"
-        )
+        msg = f"Could not match pattern: {pattern} to filename: {filename}"
+        raise RuntimeError(msg)
     return match.group(1).lower()
 
 
@@ -89,9 +89,7 @@ xml_dir = Path("data", "annotations", "xmls")
 
 
 def clean_annotation_dict(annotation: dict) -> dict:
-    """
-    Returns a dict with the interesting parts for this project.
-    """
+    """Return a dict with the interesting parts for this project."""
 
     def clean_object_dict(filename: str, object_dict: dict) -> dict:
         result = {}
@@ -108,38 +106,37 @@ def clean_annotation_dict(annotation: dict) -> dict:
         "width": float(annotation["size"]["width"]),
         "height": float(annotation["size"]["height"]),
     }
-    result["objects"] = [
-        clean_object_dict(filename, object_dict) for object_dict in annotation["object"]
-    ]
+    result["objects"] = [clean_object_dict(filename, object_dict) for object_dict in annotation["object"]]
 
     return result
 
 
 def save_to_yaml(save_file_path: Path, annotations: list[dict]) -> None:
+    """Save annotations to yaml file."""
     yaml_dict = {"annotations": annotations}
-    with open(save_file_path, "w") as f:
+    with save_file_path.open(mode="w") as f:
         yaml.dump(data=yaml_dict, stream=f, default_flow_style=False)
 
 
-def xmls_to_yaml(
-    xmls_path: Path, save_dir_path: Path, test_portion: float, valid_portion: float
-) -> None:
+def xmls_to_yaml(xmls_path: Path, save_dir_path: Path, train_portion: float, valid_portion: float) -> None:
+    """Convert xml annotations to yaml file format."""
     annotations = []
     for xml_file in xmls_path.glob("*.xml"):
-        tree = ET.parse(xml_file)
+        tree = ET.parse(xml_file)  # noqa: S314
         root = tree.getroot()
         annotation = xml_to_dict(root)
 
         if isinstance(annotation, str):
-            raise ValueError(f"Annotation '{annotation}' should be dict. Received str")
+            msg = f"Annotation '{annotation}' should be dict. Received str"
+            raise TypeError(msg)
 
         annotations.append(clean_annotation_dict(annotation))
 
     random.shuffle(annotations)
     n_annotations = len(annotations)
 
-    train_upper_index = int(test_portion * n_annotations)
-    valid_upper_index = int((test_portion + valid_portion) * n_annotations)
+    train_upper_index = int(train_portion * n_annotations)
+    valid_upper_index = int((train_portion + valid_portion) * n_annotations)
 
     save_to_yaml(save_dir_path.joinpath("train.yaml"), annotations[:train_upper_index])
     save_to_yaml(
@@ -150,12 +147,11 @@ def xmls_to_yaml(
 
 
 def main() -> None:
+    """Run script."""
     arg_parser = ArgumentParser(
-        description="Convert xml annotations for the Oxford-IIIT Pet Dataset into a single yaml file"
+        description="Convert xml annotations for the Oxford-IIIT Pet Dataset into a single yaml file",
     )
-    arg_parser.add_argument(
-        "--xmls-dir", required=True, help="Path to the dir with the xml annotations"
-    )
+    arg_parser.add_argument("--xmls-dir", required=True, help="Path to the dir with the xml annotations")
     arg_parser.add_argument(
         "--save-dir-path",
         required=True,
@@ -177,7 +173,10 @@ def main() -> None:
         "--seed",
         default=42,
         type=int,
-        help="Seed used to initialize the random number generator. Different seed produces different train, test, and valid split",
+        help=(
+            "Seed used to initialize the random number generator."
+            "Different seed produces different train, test, and valid split"
+        ),
     )
 
     args = arg_parser.parse_args()
@@ -188,9 +187,8 @@ def main() -> None:
     valid_portion = args.valid_portion
 
     if (train_portion < 0 or valid_portion < 0) or train_portion + valid_portion > 1:
-        raise ValueError(
-            "train-portion and valid-portion must be nonnegative and their sum must be at most 1."
-        )
+        msg = "train-portion and valid-portion must be nonnegative and their sum must be at most 1."
+        raise ValueError(msg)
 
     random.seed(args.seed)
 

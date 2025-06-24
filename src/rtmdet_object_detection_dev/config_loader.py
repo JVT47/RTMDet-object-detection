@@ -1,8 +1,10 @@
 from pathlib import Path
+
 import yaml
 
 
 def convert_dict(d: dict) -> None:
+    """Convert the dict values to suitable types."""
     for k, v in d.items():
         if isinstance(v, dict):
             convert_dict(v)
@@ -19,7 +21,8 @@ def convert_dict(d: dict) -> None:
 
 
 def load_yaml_file(yaml_file_path: Path) -> dict:
-    with open(yaml_file_path, "r") as f:
+    """Load and convert config from a yaml file."""
+    with yaml_file_path.open() as f:
         config = yaml.safe_load(f)
 
     convert_dict(config)

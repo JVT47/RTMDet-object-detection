@@ -1,21 +1,21 @@
-"""
-A script that is used to convert trained RTMDet models to ONNX format.
+"""A script that is used to convert trained RTMDet models to ONNX format.
 
 Example usage:
-uv run -m scripts.convert_to_onnx --model-name RTMDetM --num_classes 80 --model-weights model_weights/RTMDetM-coco.pth --output-name RTMDetM-coco
+uv run -m scripts.convert_to_onnx --model-name RTMDetM --num_classes 80 --model-weights model_weights/RTMDetM-coco.pth
+--output-name RTMDetM-coco
 """
 
 from argparse import ArgumentParser
 from pathlib import Path
+
 import torch
 
 from rtmdet_object_detection_dev.model.model import make_model
 
 
 def main() -> None:
-    parser = ArgumentParser(
-        description="Script that converts a given RTMDet model to onnx."
-    )
+    """Run script."""
+    parser = ArgumentParser(description="Script that converts a given RTMDet model to onnx.")
 
     parser.add_argument(
         "--model-name",
@@ -35,9 +35,7 @@ def main() -> None:
         type=str,
         help="Path to the model weights file",
     )
-    parser.add_argument(
-        "--output-name", required=True, type=str, help="Name of the produced onnx file"
-    )
+    parser.add_argument("--output-name", required=True, type=str, help="Name of the produced onnx file")
 
     args = parser.parse_args()
 
@@ -45,7 +43,7 @@ def main() -> None:
         args.model_name,
         args.num_classes,
         args.model_weights,
-        eval=True,
+        eval_mode=True,
         raw_output=True,
     )
 

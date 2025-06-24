@@ -1,8 +1,9 @@
 from pathlib import Path
+
 import torch
+import yaml
 from torch.utils.data import Dataset
 from torchvision.io.image import decode_image
-import yaml
 
 from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
     BBoxLabelContainer,
@@ -13,6 +14,8 @@ from rtmdet_object_detection_dev.processors.rtmdet_preprocessor import (
 
 
 class OxfordPetDataset(Dataset):
+    """Dataset implementation for the Oxford Pet Data."""
+
     def __init__(
         self,
         annotations_file_path: Path,
@@ -20,7 +23,8 @@ class OxfordPetDataset(Dataset):
         preprocessor_config: dict,
         num_classes: int = 37,
     ) -> None:
-        """
+        """Initialize the dataset.
+
         ## Args
         - annotation_file_path: Path to the yaml file that holds the image annotations.
         - image_dir_path: Path to the dir that contains the dataset images.
@@ -29,7 +33,7 @@ class OxfordPetDataset(Dataset):
         """
         super().__init__()
 
-        with open(annotations_file_path, "r") as f:
+        with annotations_file_path.open() as f:
             self.annotations = yaml.safe_load(f)["annotations"]
 
         self.image_dir_path = image_dir_path
@@ -37,9 +41,11 @@ class OxfordPetDataset(Dataset):
         self.num_classes = num_classes
 
     def __len__(self) -> int:
+        """Get the length of the dataset."""
         return len(self.annotations)
 
     def __getitem__(self, index: int) -> tuple[torch.Tensor, BBoxLabelContainer]:
+        """Get an image and its bounding boxes."""
         annotation = self.annotations[index]
 
         image_path = self.image_dir_path.joinpath(annotation["filename"])
@@ -63,12 +69,10 @@ class OxfordPetDataset(Dataset):
                         object_annotation["bbox"]["ymin"],
                         object_annotation["bbox"]["xmax"],
                         object_annotation["bbox"]["ymax"],
-                    ]
-                )
+                    ],
+                ),
             )
             label_id = object_annotation["breed_id"]
-            labels.append(
-                torch.nn.functional.one_hot(torch.tensor(label_id), self.num_classes)
-            )
+            labels.append(torch.nn.functional.one_hot(torch.tensor(label_id), self.num_classes))
 
         return BBoxLabelContainer(torch.stack(bboxes), torch.stack(labels))
