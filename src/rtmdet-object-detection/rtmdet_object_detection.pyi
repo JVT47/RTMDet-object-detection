@@ -1,50 +1,35 @@
-import numpy as np
 from typing import Any
 
+import numpy as np
+
 class BBox:
-    """
-    A class containing the properties of a bound box.
-    """
+    """A class containing the properties of a bound box."""
 
     @property
     def top_left(self) -> tuple[float, float]:
-        """
-        The top left (x, y) coordinates of the bounding box.
-        """
+        """The top left (x, y) coordinates of the bounding box."""
 
     @property
     def bottom_right(self) -> tuple[float, float]:
-        """
-        The bottom right (x, y) coordinates of the bounding box.
-        """
+        """The bottom right (x, y) coordinates of the bounding box."""
 
     @property
     def class_num(self) -> int:
-        """
-        The index of the detected class. Starts from 0.
-        """
+        """The index of the detected class. Starts from 0."""
 
     @property
     def score(self) -> float:
-        """
-        The probability confidence of the detected class.
-        """
+        """The probability confidence of the detected class."""
 
 class DetectionOutput:
-    """
-    A class for holding the bounding box detections for an image.
-    """
+    """A class for holding the bounding box detections for an image."""
 
     @property
     def bboxes(self) -> list[BBox]:
-        """
-        List containing the detected bounding boxes for the image.
-        """
+        """List containing the detected bounding boxes for the image."""
 
 class RTMDetDetector:
-    """
-    A class for the RTMDet object detector.
-    """
+    """A class for the RTMDet object detector."""
 
     def __init__(
         self,
@@ -57,7 +42,8 @@ class RTMDetDetector:
         color_mean: tuple[float, float, float] = (103.53, 116.28, 123.675),
         color_std: tuple[float, float, float] = (57.375, 57.12, 58.395),
     ) -> None:
-        """
+        """Initialize the detector.
+
         ## Args:
             - model_path: path to the RTMDet model onnx file.
             - inference_shape: (width, height) to which images are preprocessed before the model.
@@ -69,11 +55,8 @@ class RTMDetDetector:
             - color_std: the rgb std values used in normalization in preprocessing
         """
 
-    def detect_from_numpy(
-        self, arrays: list[np.ndarray[Any, np.dtype[np.uint8]]]
-    ) -> list[DetectionOutput]:
-        """
-        Performs object detection for the given numpy images.
+    def detect_from_numpy(self, arrays: list[np.ndarray[Any, np.dtype[np.uint8]]]) -> list[DetectionOutput]:
+        """Perform object detection for the given numpy images.
 
         # Args:
             - arrays: list of images

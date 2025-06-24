@@ -1,18 +1,15 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
-from ..basic_components import ConvModule, CSPLayer
+from rtmdet_object_detection_dev.model.basic_components import ConvModule, CSPLayer
 
 
 class CSPNeXtPAFPN(nn.Module):
-    """
-    Neck of the RTMDet object detector.
-    """
+    """Neck of the RTMDet object detector."""
 
-    def __init__(
-        self, widen_factor: float, deepen_factor: float, *args, **kwargs
-    ) -> None:
-        """
+    def __init__(self, widen_factor: float, deepen_factor: float, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Initialize the neck.
+
         ## Args
         - widen_factor: the factor by which the out_channels should be multiplied.
         - deepen_factor: the factor by which the depth of the network should be multiplied.
@@ -37,7 +34,7 @@ class CSPNeXtPAFPN(nn.Module):
                     stride=1,
                     padding=0,
                 ),
-            ]
+            ],
         )
         self.top_down_blocks = nn.ModuleList(
             [
@@ -55,7 +52,7 @@ class CSPNeXtPAFPN(nn.Module):
                     n=round(3 * deepen_factor),
                     attention=False,
                 ),
-            ]
+            ],
         )
         self.downsamples = nn.ModuleList(
             [
@@ -73,7 +70,7 @@ class CSPNeXtPAFPN(nn.Module):
                     stride=2,
                     padding=1,
                 ),
-            ]
+            ],
         )
         self.bottom_up_blocks = nn.ModuleList(
             [
@@ -91,7 +88,7 @@ class CSPNeXtPAFPN(nn.Module):
                     n=round(3 * deepen_factor),
                     attention=False,
                 ),
-            ]
+            ],
         )
         self.out_convs = nn.ModuleList(
             [
@@ -116,12 +113,14 @@ class CSPNeXtPAFPN(nn.Module):
                     stride=1,
                     padding=1,
                 ),
-            ]
+            ],
         )
 
     def forward(
-        self, x: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+        self,
+        x: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Perform the neck calculations for the given feature layers."""
         # top down path
         out3 = self.reduce_layers[0](x[2])
 

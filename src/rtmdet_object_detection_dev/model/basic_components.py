@@ -1,9 +1,11 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class ConvModule(nn.Module):
-    def __init__(
+    """Basic convolution module."""
+
+    def __init__(  # noqa: PLR0913
         self,
         in_channels: int,
         out_channels: int,
@@ -11,9 +13,10 @@ class ConvModule(nn.Module):
         stride: int,
         padding: int | str,
         groups: int = 1,
-        *args,
-        **kwargs,
+        *args,  # noqa: ANN002
+        **kwargs,  # noqa: ANN003
     ) -> None:
+        """Initialize the module."""
         super().__init__(*args, **kwargs)
 
         self.conv = nn.Conv2d(
@@ -29,23 +32,25 @@ class ConvModule(nn.Module):
         self.activate = nn.SiLU(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Perform convolution, batchnorm, and activation."""
         x = self.conv(x)
         x = self.bn(x)
-        x = self.activate(x)
-
-        return x
+        return self.activate(x)
 
 
 class DepthwiseSeparableConvModule(nn.Module):
+    """Depthwise separable convolution module."""
+
     def __init__(
         self,
         in_channels: int,
         kernel_size: int,
         stride: int,
         padding: int | str,
-        *args,
-        **kwargs,
+        *args,  # noqa: ANN002
+        **kwargs,  # noqa: ANN003
     ) -> None:
+        """Initialize the module."""
         super().__init__(*args, **kwargs)
 
         self.depthwise_conv = ConvModule(
@@ -56,32 +61,28 @@ class DepthwiseSeparableConvModule(nn.Module):
             padding=padding,
             groups=in_channels,
         )
-        self.pointwise_conv = ConvModule(
-            in_channels, out_channels=in_channels, kernel_size=1, stride=1, padding=0
-        )
+        self.pointwise_conv = ConvModule(in_channels, out_channels=in_channels, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Perform depthwise, and pointwise convolution."""
         x = self.depthwise_conv(x)
-        x = self.pointwise_conv(x)
 
-        return x
+        return self.pointwise_conv(x)
 
 
 class CSPNeXtBlock(nn.Module):
-    def __init__(
-        self, in_channels: int, out_channels: int, add: bool, *args, **kwargs
-    ) -> None:
+    """CSPNeXtBlock module."""
+
+    def __init__(self, in_channels: int, out_channels: int, *args, add: bool, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Initialize the module."""
         super().__init__(*args, **kwargs)
 
-        self.conv1 = ConvModule(
-            in_channels, out_channels, kernel_size=3, stride=1, padding=1
-        )
-        self.conv2 = DepthwiseSeparableConvModule(
-            in_channels=out_channels, kernel_size=5, stride=1, padding=2
-        )
+        self.conv1 = ConvModule(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = DepthwiseSeparableConvModule(in_channels=out_channels, kernel_size=5, stride=1, padding=2)
         self.add = add
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Perform the module calculations."""
         out = self.conv1(x)
         out = self.conv2(out)
 
@@ -92,43 +93,43 @@ class CSPNeXtBlock(nn.Module):
 
 
 class ChannelAttention(nn.Module):
-    def __init__(self, in_channels: int, *args, **kwargs) -> None:
+    """Channel attention module."""
+
+    def __init__(self, in_channels: int, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Initialize the module."""
         super().__init__(*args, **kwargs)
 
         self.global_avgpool = nn.AdaptiveAvgPool2d(output_size=1)
-        self.fc = nn.Conv2d(
-            in_channels, out_channels=in_channels, kernel_size=1, stride=1, padding=0
-        )
+        self.fc = nn.Conv2d(in_channels, out_channels=in_channels, kernel_size=1, stride=1, padding=0)
         self.act = nn.Hardsigmoid(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Perform channel attention."""
         out = self.global_avgpool(x)
         out = self.fc(out)
         out = self.act(out)
-        out = torch.einsum("bchw,bcij -> bchw", x, out)
 
-        return out
+        return torch.einsum("bchw,bcij -> bchw", x, out)
 
 
 class CSPLayer(nn.Module):
+    """CSPLayer module."""
+
     def __init__(
         self,
         in_channels: int,
         out_channels: int,
-        add: bool,
         n: int,
+        *args,  # noqa: ANN002
+        add: bool,
         attention: bool,
-        *args,
-        **kwargs,
+        **kwargs,  # noqa: ANN003
     ) -> None:
+        """Initialize the module."""
         super().__init__(*args, **kwargs)
 
-        self.main_conv = ConvModule(
-            in_channels, out_channels // 2, kernel_size=1, stride=1, padding=0
-        )
-        self.short_conv = ConvModule(
-            in_channels, out_channels // 2, kernel_size=1, stride=1, padding=0
-        )
+        self.main_conv = ConvModule(in_channels, out_channels // 2, kernel_size=1, stride=1, padding=0)
+        self.short_conv = ConvModule(in_channels, out_channels // 2, kernel_size=1, stride=1, padding=0)
         self.final_conv = ConvModule(
             in_channels=out_channels,
             out_channels=out_channels,
@@ -144,13 +145,12 @@ class CSPLayer(nn.Module):
                     add=add,
                 )
                 for _ in range(n)
-            ]
+            ],
         )
-        self.attention = (
-            ChannelAttention(in_channels=out_channels) if attention else None
-        )
+        self.attention = ChannelAttention(in_channels=out_channels) if attention else None
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Perform the module calculations."""
         main = self.main_conv(x)
         main = self.blocks(main)
         short = self.short_conv(x)
@@ -158,13 +158,15 @@ class CSPLayer(nn.Module):
         out = torch.concat([main, short], dim=1)
         if self.attention is not None:
             out = self.attention(out)
-        out = self.final_conv(out)
 
-        return out
+        return self.final_conv(out)
 
 
 class SPPFBottleneck(nn.Module):
-    def __init__(self, in_channels: int, *args, **kwargs) -> None:
+    """SPPFBottleneck module."""
+
+    def __init__(self, in_channels: int, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Initialize the module."""
         super().__init__(*args, **kwargs)
 
         self.conv1 = ConvModule(
@@ -176,16 +178,10 @@ class SPPFBottleneck(nn.Module):
         )
         self.poolings = nn.ModuleList(
             [
-                nn.MaxPool2d(
-                    kernel_size=5, stride=1, padding=2, dilation=1, ceil_mode=False
-                ),
-                nn.MaxPool2d(
-                    kernel_size=9, stride=1, padding=4, dilation=1, ceil_mode=False
-                ),
-                nn.MaxPool2d(
-                    kernel_size=13, stride=1, padding=6, dilation=1, ceil_mode=False
-                ),
-            ]
+                nn.MaxPool2d(kernel_size=5, stride=1, padding=2, dilation=1, ceil_mode=False),
+                nn.MaxPool2d(kernel_size=9, stride=1, padding=4, dilation=1, ceil_mode=False),
+                nn.MaxPool2d(kernel_size=13, stride=1, padding=6, dilation=1, ceil_mode=False),
+            ],
         )
         self.conv2 = ConvModule(
             (in_channels // 2) * 4,
@@ -196,12 +192,12 @@ class SPPFBottleneck(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Perform module calculations."""
         x = self.conv1(x)
         pooling1 = self.poolings[0](x)
         pooling2 = self.poolings[1](pooling1)
         pooling3 = self.poolings[2](pooling2)
 
         out = torch.concat([x, pooling1, pooling2, pooling3], dim=1)
-        out = self.conv2(out)
 
-        return out
+        return self.conv2(out)

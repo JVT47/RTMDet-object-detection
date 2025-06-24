@@ -1,18 +1,15 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
-from ..basic_components import ConvModule, CSPLayer, SPPFBottleneck
+from rtmdet_object_detection_dev.model.basic_components import ConvModule, CSPLayer, SPPFBottleneck
 
 
 class CSPNeXt(nn.Module):
-    """
-    Backbone of the RTMDet object detector.
-    """
+    """Backbone of the RTMDet object detector."""
 
-    def __init__(
-        self, widen_factor: float, deepen_factor: float, *args, **kwargs
-    ) -> None:
-        """
+    def __init__(self, widen_factor: float, deepen_factor: float, *args, **kwargs) -> None:  # noqa: ANN002, ANN003
+        """Initialize the backbone.
+
         ## Args
         - widen_factor: the factor by which the out_channels should be multiplied.
         - deepen_factor: the factor by which the depth of the network should be multiplied.
@@ -109,9 +106,8 @@ class CSPNeXt(nn.Module):
             ),
         )
 
-    def forward(
-        self, x: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Extract multi-scale feature maps from an input image."""
         x = self.stem(x)
         x = self.stage1(x)
         out1 = self.stage2(x)

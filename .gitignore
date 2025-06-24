@@ -10,6 +10,7 @@ wheels/
 .venv
 
 # Other files
+*.coverage
 *.pth
 *.ipynb
 *.jpg

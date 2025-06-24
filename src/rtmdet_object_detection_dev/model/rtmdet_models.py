@@ -1,37 +1,36 @@
 import torch
-import torch.nn as nn
+from torch import nn
+
+from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
 
 from .backbone.cspnext import CSPNeXt
-from .neck.cspnext_pafpn import CSPNeXtPAFPN
 from .head.rtmdet_sep_bn_head import RTMDetSepBNHead
-from rtmdet_object_detection_dev.dataclasses.rtmdet_output import RTMDetOutput
+from .neck.cspnext_pafpn import CSPNeXtPAFPN
 
 
 class RTMDet(nn.Module):
-    """
-    General RTMDet model.
-    """
+    """General RTMDet model."""
 
     def __init__(
         self,
         widen_factor: float,
         deepen_factor: float,
         num_classes: int,
+        *args,  # noqa: ANN002
         exp_on_reg: bool,
-        *args,
         raw_output: bool = False,
-        **kwargs,
+        **kwargs,  # noqa: ANN003
     ) -> None:
+        """Initialize the model."""
         super().__init__(*args, **kwargs)
 
         self.backbone = CSPNeXt(widen_factor, deepen_factor)
         self.neck = CSPNeXtPAFPN(widen_factor, deepen_factor)
-        self.bbox_head = RTMDetSepBNHead(
-            widen_factor, num_classes, exp_on_reg=exp_on_reg, raw_output=raw_output
-        )
+        self.bbox_head = RTMDetSepBNHead(widen_factor, num_classes, exp_on_reg=exp_on_reg, raw_output=raw_output)
 
     def forward(
-        self, x: torch.Tensor
+        self,
+        x: torch.Tensor,
     ) -> (
         RTMDetOutput
         | tuple[
@@ -39,8 +38,8 @@ class RTMDet(nn.Module):
             tuple[torch.Tensor, torch.Tensor, torch.Tensor],
         ]
     ):
+        """Detect bboxes for the image(s)."""
         out = self.backbone(x)
         out = self.neck(out)
-        out = self.bbox_head(out)
 
-        return out
+        return self.bbox_head(out)

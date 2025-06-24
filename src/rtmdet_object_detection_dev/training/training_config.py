@@ -1,9 +1,12 @@
 from pathlib import Path
-from pydantic import BaseModel
 from typing import Any
+
+from pydantic import BaseModel
 
 
 class TrainingConfig(BaseModel):
+    """Pydantic model for the training config."""
+
     model_cfg: dict[str, Any]
     training_dataloader_config: dict[str, Any]
     validation_dataloader_config: dict[str, Any]
