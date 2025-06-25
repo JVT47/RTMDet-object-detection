@@ -122,7 +122,10 @@ def main() -> None:
 
     with torch.inference_mode():
         for image_file_batch in batch_image_files(image_file_generator, args.batch_size):
-            images = [torchvision.io.read_image(str(file_path)).float() for file_path in image_file_batch]
+            images = [
+                torchvision.io.read_image(str(file_path), torchvision.io.ImageReadMode.RGB).float()
+                for file_path in image_file_batch
+            ]
 
             input_batch = preprocess_images_to_batch(images, preprocessor)
             model_output = model(input_batch)
