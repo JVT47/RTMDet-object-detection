@@ -102,7 +102,10 @@ def main() -> None:
     image_file_generator = chain(input_dir.glob("*.jpg"), input_dir.glob("*.png"))
 
     for image_file_batch in batch_image_files(image_file_generator, args.batch_size):
-        images = [torchvision.io.read_image(str(file_path)) for file_path in image_file_batch]
+        images = [
+            torchvision.io.read_image(str(file_path), torchvision.io.ImageReadMode.RGB)
+            for file_path in image_file_batch
+        ]
         images_np = [image.permute(1, 2, 0).numpy() for image in images]
 
         detection_results = detector.detect_from_numpy(images_np)

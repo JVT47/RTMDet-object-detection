@@ -1,7 +1,7 @@
 """A script that is used to convert trained RTMDet models to ONNX format.
 
 Example usage:
-uv run -m scripts.convert_to_onnx --model-name RTMDetM --num_classes 80 --model-weights model_weights/RTMDetM-coco.pth
+uv run -m scripts.convert_to_onnx --model-name RTMDetM --num-classes 80 --model-weights model_weights/RTMDetM-coco.pth
 --output-name RTMDetM-coco
 """
 
@@ -24,7 +24,7 @@ def main() -> None:
         help="Name of the model. E.g., RTMDetTiny",
     )
     parser.add_argument(
-        "--num_classes",
+        "--num-classes",
         required=True,
         type=int,
         help="The number of classes the model predicts",
