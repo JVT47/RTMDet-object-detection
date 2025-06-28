@@ -40,13 +40,15 @@ class OxfordPetDataset(Dataset):
 
         self.image_dir_path = image_dir_path
         self.preprocessor = RTMDetPreprocessor(**preprocessor_config)
-        self.num_classes = num_classes
 
-        dest_size: tuple[int, int] = tuple(self.preprocessor.dest_size[-2:])  # type: ignore This produces the correct type
+        self.num_classes = num_classes
+        self.dest_size: tuple[int, int] = tuple(self.preprocessor.dest_size[-2:])  # type: ignore This produces the correct type
+        self.pad_color = self.preprocessor.pad_color
+
         self.transforms = v2.Compose(
             [
                 v2.RandomHorizontalFlip(),
-                v2.ScaleJitter(dest_size),
+                v2.ScaleJitter(self.dest_size),
             ],
         )
 
@@ -70,7 +72,7 @@ class OxfordPetDataset(Dataset):
         image, bboxes = self.transforms(image, bboxes)
         gt.bboxes = bboxes.data
 
-        image = v2.functional.crop(image, 0, 0, 480, 480)
+        image = self._crop_to_dest_size(image)
 
         return image, gt
 
@@ -93,9 +95,29 @@ class OxfordPetDataset(Dataset):
 
         return BBoxLabelContainer(torch.stack(bboxes), torch.stack(labels))
 
+    def _crop_to_dest_size(self, image: torch.Tensor) -> torch.Tensor:
+        height, width = image.shape[-2:]
+
+        image = v2.functional.crop(
+            image,
+            0,
+            0,
+            height=self.dest_size[0],
+            width=self.dest_size[1],
+        )
+
+        pad_height = max(0, self.dest_size[0] - height)
+        pad_width = max(0, self.dest_size[1] - width)
+
+        pad_color = torch.tensor(self.pad_color).reshape(3, 1, 1)
+        image[:, self.dest_size[0] - pad_height :, :] = pad_color
+        image[:, :, self.dest_size[1] - pad_width :] = pad_color
+
+        return image
+
 
 if __name__ == "__main__":
-    """Show 4 random outputs of the dataset to test that it works."""
+    """Show random outputs of the dataset to test that it works."""
     import random
 
     import cv2
@@ -111,7 +133,7 @@ if __name__ == "__main__":
         },
     )
 
-    indices = random.sample(range(len(dataset)), 20)
+    indices = random.sample(range(len(dataset)), 10)
 
     for i in indices:
         image, gt = dataset.__getitem__(i)
