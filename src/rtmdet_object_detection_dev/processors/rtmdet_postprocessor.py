@@ -77,8 +77,9 @@ class RTMDetPostprocessor:
             int(scale_factor * orig_width),
         )
 
-        bboxes /= torch.tensor([rescale_width, rescale_height, rescale_width, rescale_height])
-        bboxes *= torch.tensor([orig_width, orig_height, orig_width, orig_height])
+        device = bboxes.device
+        bboxes /= torch.tensor([rescale_width, rescale_height, rescale_width, rescale_height], device=device)
+        bboxes *= torch.tensor([orig_width, orig_height, orig_width, orig_height], device=device)
 
         return bboxes
 
