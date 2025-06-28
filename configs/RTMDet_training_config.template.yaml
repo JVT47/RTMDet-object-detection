@@ -4,6 +4,7 @@ define: &input_size [480, 480]
 define: &padding_color [114, 114, 114]
 define: &color_mean [103.53, 116.28, 123.675]
 define: &color_std [57.375, 57.12, 58.395]
+define: &batch_size 128
 
 train_config:
   model_cfg:
@@ -24,6 +25,7 @@ train_config:
             mean: *color_mean
             std: *color_std
           num_classes: *num_classes
+    batch_size: *batch_size
   
   validation_dataloader_config:
     dataset_configs:
@@ -37,6 +39,7 @@ train_config:
             mean: *color_mean
             std: *color_std
           num_classes: *num_classes
+    batch_size: *batch_size
   
   loss_fn_config:
     name: "RTMDetLoss"
@@ -46,8 +49,9 @@ train_config:
   optimizer_config:
     name: "AdamW"
     config:
+      lr: 0.001
 
   session_name: "test"
   weights_save_path: model_weights/trained
   epochs: 80
-  device: "cpu"
+  device: "cuda:0"

@@ -35,19 +35,20 @@ class GIoULoss(nn.Module):
         Both inputs should be in shape (..., 4) and the calculations are done element wise.
         Returns tensors of shape (...), i.e., with one dimension less than the input. (IoU, Union).
         """
+        device = boxes_1.device
         I_width = torch.minimum(boxes_1[..., -2], boxes_2[..., -2]) - torch.maximum(boxes_1[..., -4], boxes_2[..., -4])  # noqa: N806
-        I_width = torch.maximum(torch.tensor([0]), I_width)  # noqa: N806
+        I_width = torch.maximum(torch.tensor([0], device=device), I_width)  # noqa: N806
         I_height = torch.minimum(boxes_1[..., -1], boxes_2[..., -1]) - torch.maximum(boxes_1[..., -3], boxes_2[..., -3])  # noqa: N806
-        I_height = torch.maximum(torch.tensor([0]), I_height)  # noqa: N806
+        I_height = torch.maximum(torch.tensor([0], device=device), I_height)  # noqa: N806
         I_area = I_width * I_height  # noqa: N806
 
         boxes_1_area = (boxes_1[..., -2] - boxes_1[..., -4]) * (boxes_1[..., -1] - boxes_1[..., -3])
-        boxes_1_area = torch.maximum(torch.tensor([0]), boxes_1_area)
+        boxes_1_area = torch.maximum(torch.tensor([0], device=device), boxes_1_area)
         boxes_2_area = (boxes_2[..., -2] - boxes_2[..., -4]) * (boxes_2[..., -1] - boxes_2[..., -3])
-        boxes_2_area = torch.maximum(torch.tensor([0]), boxes_2_area)
+        boxes_2_area = torch.maximum(torch.tensor([0], device=device), boxes_2_area)
 
         union = boxes_1_area + boxes_2_area - I_area
-        IoU = torch.zeros_like(union)  # noqa: N806
+        IoU = torch.zeros_like(union, device=device)  # noqa: N806
         mask = union > 0
         IoU[mask] = I_area[mask] / union[mask]
 

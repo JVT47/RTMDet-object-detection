@@ -29,21 +29,21 @@ class RTMDetPostprocessor:
         self.score_threshold = score_threshold
         self.iou_threshold = iou_threshold
 
-    def process_batch(self, model_output: RTMDetOutput) -> list[DetectionResult]:
+    def process_batch(self, model_output: RTMDetOutput) -> list[DetectionResult | None]:
         """Transform each model output batch element to a detection result.
 
         Returns the detection results in a list in the same order as they are in the batch.
         """
         batch_preds = model_output.process_and_combine_layers()
 
-        detection_results = []
+        detection_results: list[DetectionResult | None] = []
         for bbox_pred, cls_pred in zip(batch_preds.bboxes, batch_preds.labels, strict=True):
             detection_result = self.process_single_batch_element(BBoxLabelContainer(bbox_pred, cls_pred))
             detection_results.append(detection_result)
 
         return detection_results
 
-    def process_single_batch_element(self, bbox_and_label_preds: BBoxLabelContainer) -> DetectionResult:
+    def process_single_batch_element(self, bbox_and_label_preds: BBoxLabelContainer) -> DetectionResult | None:
         """Process the model outputs for a single image, i.e., the input tensors should not have the batch dimension."""
         bboxes, cls_pred = bbox_and_label_preds.bboxes, bbox_and_label_preds.labels
 
@@ -77,12 +77,13 @@ class RTMDetPostprocessor:
             int(scale_factor * orig_width),
         )
 
-        bboxes /= torch.tensor([rescale_width, rescale_height, rescale_width, rescale_height])
-        bboxes *= torch.tensor([orig_width, orig_height, orig_width, orig_height])
+        device = bboxes.device
+        bboxes /= torch.tensor([rescale_width, rescale_height, rescale_width, rescale_height], device=device)
+        bboxes *= torch.tensor([orig_width, orig_height, orig_width, orig_height], device=device)
 
         return bboxes
 
-    def _perform_nms(self, bboxes: torch.Tensor, classes: torch.Tensor, scores: torch.Tensor) -> DetectionResult:
+    def _perform_nms(self, bboxes: torch.Tensor, classes: torch.Tensor, scores: torch.Tensor) -> DetectionResult | None:
         """Perform non maximum suppression for each individual class and returns the kept detections.
 
         NMS is done for each individual class to allow different classes to overlap. All input tensors should not have
@@ -98,6 +99,9 @@ class RTMDetPostprocessor:
             kept_bboxes.append(bboxes[mask][indices])
             kept_classes.append(classes[mask][indices])
             kept_scores.append(scores[mask][indices])
+
+        if len(kept_bboxes) == 0:
+            return None
 
         return DetectionResult(
             torch.cat(kept_bboxes, dim=0),
