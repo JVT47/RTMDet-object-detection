@@ -2,8 +2,10 @@ from pathlib import Path
 
 import torch
 import torchvision
+import torchvision.tv_tensors
 import yaml
 from torch.utils.data import Dataset
+from torchvision.transforms import v2
 
 from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
     BBoxLabelContainer,
@@ -38,7 +40,17 @@ class OxfordPetDataset(Dataset):
 
         self.image_dir_path = image_dir_path
         self.preprocessor = RTMDetPreprocessor(**preprocessor_config)
+
         self.num_classes = num_classes
+        self.dest_size: tuple[int, int] = tuple(self.preprocessor.dest_size[-2:])  # type: ignore This produces the correct type
+        self.pad_color = self.preprocessor.pad_color
+
+        self.transforms = v2.Compose(
+            [
+                v2.RandomHorizontalFlip(),
+                v2.ScaleJitter(self.dest_size),
+            ],
+        )
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
@@ -52,9 +64,15 @@ class OxfordPetDataset(Dataset):
         image = torchvision.io.image.read_image(str(image_path), mode=torchvision.io.ImageReadMode.RGB).float()
 
         gt = self._get_bbox_label_container(annotation)
-        gt.bboxes = self.preprocessor.process_bboxes(gt.bboxes, image.shape)
+        bboxes = self.preprocessor.process_bboxes(gt.bboxes, image.shape)
 
         image = self.preprocessor.process_image(image)
+        bboxes = torchvision.tv_tensors.BoundingBoxes(bboxes, format="XYXY", canvas_size=image.shape[-2:])  # type: ignore This works
+
+        image, bboxes = self.transforms(image, bboxes)
+        gt.bboxes = bboxes.data
+
+        image = self._crop_to_dest_size(image)
 
         return image, gt
 
@@ -76,3 +94,60 @@ class OxfordPetDataset(Dataset):
             labels.append(torch.nn.functional.one_hot(torch.tensor(label_id), self.num_classes))
 
         return BBoxLabelContainer(torch.stack(bboxes), torch.stack(labels))
+
+    def _crop_to_dest_size(self, image: torch.Tensor) -> torch.Tensor:
+        height, width = image.shape[-2:]
+
+        image = v2.functional.crop(
+            image,
+            0,
+            0,
+            height=self.dest_size[0],
+            width=self.dest_size[1],
+        )
+
+        pad_height = max(0, self.dest_size[0] - height)
+        pad_width = max(0, self.dest_size[1] - width)
+
+        pad_color = torch.tensor(self.pad_color).reshape(3, 1, 1)
+        image[:, self.dest_size[0] - pad_height :, :] = pad_color
+        image[:, :, self.dest_size[1] - pad_width :] = pad_color
+
+        return image
+
+
+if __name__ == "__main__":
+    """Show random outputs of the dataset to test that it works."""
+    import random
+
+    import cv2
+    from torchvision.utils import draw_bounding_boxes
+
+    dataset = OxfordPetDataset(
+        Path("data", "annotations", "train.yaml"),
+        Path("data", "images"),
+        preprocessor_config={
+            "dest_size": (480, 480),
+            "mean": (0, 0, 0),
+            "std": (1, 1, 1),
+        },
+    )
+
+    indices = random.sample(range(len(dataset)), 10)
+
+    for i in indices:
+        image, gt = dataset.__getitem__(i)
+
+        image = image.to(torch.uint8)
+        image = draw_bounding_boxes(
+            image,
+            gt.bboxes,
+            [str(label.argmax().item()) for label in gt.labels],
+            colors=(0, 255, 255),
+        )
+
+        image = image.permute(1, 2, 0).numpy()
+
+        cv2.imshow("", image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()

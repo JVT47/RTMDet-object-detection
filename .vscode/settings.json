@@ -66,8 +66,10 @@
             "source.organizeImports.ruff": "explicit"
         }
     },
-    "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "notebook.defaultFormatter": "charliermarsh.ruff",
+    "notebook.formatOnSave.enabled": true,
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer",
     },
