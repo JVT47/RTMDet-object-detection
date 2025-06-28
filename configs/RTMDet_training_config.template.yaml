@@ -49,7 +49,8 @@ train_config:
   optimizer_config:
     name: "AdamW"
     config:
-      lr: 0.001
+      lr: 0.0004
+      weight_decay: 0.05
 
   session_name: "test"
   weights_save_path: model_weights/trained
