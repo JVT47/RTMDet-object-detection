@@ -29,7 +29,8 @@ class QualityFocalLoss(nn.Module):
         """
         soft_label = target_label * IoU.unsqueeze(-1)
 
+        eps = 1e-10  # Avoid loss turning to NaNs when calculating log(0)
         loss = -1 * torch.abs(pred_label - soft_label).pow(self.beta)
-        loss *= (1 - soft_label) * torch.log(1 - pred_label) + soft_label * torch.log(pred_label)
+        loss *= (1 - soft_label) * torch.log(1 - pred_label + eps) + soft_label * torch.log(pred_label + eps)
 
         return loss.sum(dim=-1)
