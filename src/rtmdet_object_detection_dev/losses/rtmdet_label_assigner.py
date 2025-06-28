@@ -49,7 +49,8 @@ class RTMDetLabelAssigner:
     ) -> BBoxLabelContainer:
         """Create target tensors to the batch element ground truth."""
         n, num_classes = element_preds.labels.shape
-        target = BBoxLabelContainer(torch.zeros((n, 4)), torch.zeros((n, num_classes)))
+        device = grid_points.device
+        target = BBoxLabelContainer(torch.zeros((n, 4), device=device), torch.zeros((n, num_classes), device=device))
         element_gts = BBoxLabelContainer(element_gts.bboxes.float(), element_gts.labels.float())
 
         assigner_matrix = self.simOTA(element_gts, element_preds, grid_points)

@@ -1,9 +1,9 @@
 from pathlib import Path
 
 import torch
+import torchvision
 import yaml
 from torch.utils.data import Dataset
-from torchvision.io.image import decode_image
 
 from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
     BBoxLabelContainer,
@@ -49,7 +49,7 @@ class OxfordPetDataset(Dataset):
         annotation = self.annotations[index]
 
         image_path = self.image_dir_path.joinpath(annotation["filename"])
-        image = decode_image(str(image_path)).float()
+        image = torchvision.io.image.read_image(str(image_path), mode=torchvision.io.ImageReadMode.RGB).float()
 
         gt = self._get_bbox_label_container(annotation)
         gt.bboxes = self.preprocessor.process_bboxes(gt.bboxes, image.shape)

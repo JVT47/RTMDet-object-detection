@@ -18,7 +18,7 @@ class TestRTMDetLoss:
         loss = self.loss(model_output, [gt_1, gt_2])
         target = 12.986 + 2 * 0.5 / 1.5
         target += 1.903 + 2 * 1 / 1.5
-        target = torch.tensor(target)
+        target = torch.tensor(target) / 2
 
         torch.testing.assert_close(loss, target, atol=1e-2, rtol=0)
 
@@ -33,6 +33,6 @@ class TestRTMDetLoss:
         loss = self.loss(model_output, [gt_1, gt_2])
         target = 4.2216 + 2 * 0.91666
         target += 1 / 3 * (3.8344 + 2 * 5 / 9)
-        target = torch.tensor(target)
+        target = torch.tensor(target) / 2
 
         torch.testing.assert_close(loss, target, atol=1e-2, rtol=0)

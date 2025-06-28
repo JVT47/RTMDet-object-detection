@@ -44,7 +44,7 @@ class RTMDetLoss(nn.Module):
         n_positives = (mask).sum(dim=-1)  # shape (B)
         n_positives[n_positives == 0] = 1
 
-        loss = torch.zeros((batch_size, n_preds))
+        loss = torch.zeros((batch_size, n_preds), device=model_output.get_device())
         loss[mask] = self.reg_loss_weight * self.reg_loss(preds.bboxes[mask], targets.bboxes[mask])
 
         IoU, _ = self.reg_loss.calc_IoU_and_union(preds.bboxes, targets.bboxes)  # noqa: N806
@@ -52,4 +52,4 @@ class RTMDetLoss(nn.Module):
 
         loss = loss.sum(dim=1) * 1 / n_positives
 
-        return loss.sum()
+        return loss.sum() / batch_size

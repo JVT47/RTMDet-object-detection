@@ -27,8 +27,8 @@ class RTMDetOutput:
 
         for scale in scales:
             points_xx, points_yy = torch.meshgrid(
-                torch.arange(0, width, dtype=torch.float),
-                torch.arange(0, height, dtype=torch.float),
+                torch.arange(0, width, dtype=torch.float, device=self.get_device()),
+                torch.arange(0, height, dtype=torch.float, device=self.get_device()),
                 indexing="xy",
             )
             points = (
@@ -40,6 +40,10 @@ class RTMDetOutput:
             width /= 2
 
         return torch.cat(grid_points, dim=0)
+
+    def get_device(self) -> torch.device:
+        """Return the device where model outputs are located."""
+        return self.cls_preds[0].device
 
     def process_and_combine_layers(self) -> BBoxLabelContainer:
         """Combine the prediction from each layer in to one tensor and flatten.

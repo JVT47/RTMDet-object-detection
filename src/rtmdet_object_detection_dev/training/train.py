@@ -95,5 +95,6 @@ def train_model(training_config: TrainingConfig) -> None:
 
         if validation_mean_loss < best_validation_loss:
             best_validation_loss = validation_mean_loss
+            training_config.weights_save_path.mkdir(parents=True, exist_ok=True)
             weights_path = training_config.weights_save_path.joinpath(f"{training_config.session_name}.pth")
             torch.save(model.state_dict(), weights_path)

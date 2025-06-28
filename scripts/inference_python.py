@@ -3,7 +3,7 @@
 Uses the python implementation for inference with the given pytorch model weights.
 
 Example usage:
-    uv run -m scripts.inference_python --model-name RTMDetM --model-weights model_weights/RTMDetM-coco.pth
+    uv run -m scripts.inference_python --model-name RTMDetM --num-classes 80 --model-weights model_weights/RTMDetM-coco.pth
 """  # noqa: E501
 
 from argparse import ArgumentParser, Namespace
@@ -41,13 +41,16 @@ def preprocess_images_to_batch(images: Iterable[torch.Tensor], preprocessor: RTM
 
 def draw_bboxes_to_original_image(
     image: torch.Tensor,
-    det_result: DetectionResult,
+    det_result: DetectionResult | None,
     input_size: torch.Size,
 ) -> torch.Tensor:
     """Draw the detected bboxes to the original image.
 
     Transforms the bbox coordinates relative to the original dimensions if needed.
     """
+    if det_result is None:
+        return image
+
     bboxes = RTMDetPostprocessor.bbox_to_original_image(det_result.bboxes, input_size, image.shape)
     labels = [
         f"{label.item()}, {score.item():.2f}"
@@ -80,6 +83,14 @@ def get_arguments() -> Namespace:
     )
 
     parser.add_argument(
+        "--num-classes",
+        type=int,
+        required=False,
+        default=80,
+        help="The number of classes the model predicts.",
+    )
+
+    parser.add_argument(
         "--batch-size",
         type=int,
         required=False,
@@ -106,7 +117,7 @@ def main() -> None:
 
     model = make_model(
         model_name=args.model_name,
-        num_classes=80,
+        num_classes=args.num_classes,
         model_weights=args.model_weights,
         eval_mode=True,
     )
