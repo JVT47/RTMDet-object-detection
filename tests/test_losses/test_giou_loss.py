@@ -17,13 +17,24 @@ class TestGIoULoss:
         torch.testing.assert_close(iou, target_iou)
         torch.testing.assert_close(union, target_union)
 
-    def test_calc_iou_and_union_returns_correct_iou_and_union_scores(self) -> None:
+    def test_calc_iou_and_union_returns_correct_iou_and_union_scores_2(self) -> None:
         bboxes_1 = torch.tensor([[12.0, 12, 12, 12], [0, 0, 1, 1]])
         bboxes_2 = torch.tensor([[13.0, 13, 13, 13], [14, 14, 14, 14]])
 
         iou, union = self.giou_loss.calc_IoU_and_union(bboxes_1, bboxes_2)
         target_iou = torch.tensor([0.0, 0])
         target_union = torch.tensor([0.0, 1.0])
+
+        torch.testing.assert_close(iou, target_iou)
+        torch.testing.assert_close(union, target_union)
+
+    def test_calc_iou_and_union_returns_correct_iou_and_union_for_invalid_bboxes(self) -> None:
+        bboxes_1 = torch.tensor([[10.0, 10, 9, 9], [3, 4, 2, 3]])
+        bboxes_2 = torch.tensor([[10.0, 10, 11, 11], [0, 1, 1, 0]])
+
+        iou, union = self.giou_loss.calc_IoU_and_union(bboxes_1, bboxes_2)
+        target_iou = torch.tensor([0.0, 0])
+        target_union = torch.tensor([1.0, 0.0])
 
         torch.testing.assert_close(iou, target_iou)
         torch.testing.assert_close(union, target_union)

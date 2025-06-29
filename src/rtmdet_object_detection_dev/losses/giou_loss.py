@@ -16,14 +16,17 @@ class GIoULoss(nn.Module):
         """
         IoU, union = self.calc_IoU_and_union(boxes_1, boxes_2)  # noqa: N806
 
+        device = boxes_1.device
         enclosure_width = torch.maximum(boxes_1[..., -2], boxes_2[..., -2]) - torch.minimum(
             boxes_1[..., -4],
             boxes_2[..., -4],
         )
+        torch.maximum(torch.tensor([0], device=device), enclosure_width)
         enclosure_height = torch.maximum(boxes_1[..., -1], boxes_2[..., -1]) - torch.minimum(
             boxes_1[..., -3],
             boxes_2[..., -3],
         )
+        torch.maximum(torch.tensor([0], device=device), enclosure_height)
         enclosure_area = enclosure_width * enclosure_height
 
         GIoU = IoU - (enclosure_area - union) / enclosure_area  # noqa: N806
@@ -42,10 +45,22 @@ class GIoULoss(nn.Module):
         I_height = torch.maximum(torch.tensor([0], device=device), I_height)  # noqa: N806
         I_area = I_width * I_height  # noqa: N806
 
-        boxes_1_area = (boxes_1[..., -2] - boxes_1[..., -4]) * (boxes_1[..., -1] - boxes_1[..., -3])
-        boxes_1_area = torch.maximum(torch.tensor([0], device=device), boxes_1_area)
-        boxes_2_area = (boxes_2[..., -2] - boxes_2[..., -4]) * (boxes_2[..., -1] - boxes_2[..., -3])
-        boxes_2_area = torch.maximum(torch.tensor([0], device=device), boxes_2_area)
+        boxes_1_area = torch.maximum(
+            torch.tensor([0], device=device),
+            (boxes_1[..., -2] - boxes_1[..., -4]),
+        ) * torch.maximum(
+            torch.tensor([0], device=device),
+            (boxes_1[..., -1] - boxes_1[..., -3]),
+        )
+        boxes_2_area = torch.maximum(
+            torch.tensor([0], device=device),
+            (boxes_2[..., -2] - boxes_2[..., -4]),
+        ) * (
+            torch.maximum(
+                torch.tensor([0], device=device),
+                (boxes_2[..., -1] - boxes_2[..., -3]),
+            )
+        )
 
         union = boxes_1_area + boxes_2_area - I_area
         IoU = torch.zeros_like(union, device=device)  # noqa: N806
