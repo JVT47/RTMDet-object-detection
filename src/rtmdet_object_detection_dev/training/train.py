@@ -18,8 +18,9 @@ def gts_to_device(gts: list[BBoxLabelContainer], device: torch.device) -> list[B
     return [BBoxLabelContainer(gt.bboxes.to(device), gt.labels.to(device)) for gt in gts]
 
 
-def train_one_epoch(
+def train_one_epoch(  # noqa: PLR0913
     model: nn.Module,
+    ema_model: torch.optim.swa_utils.AveragedModel,
     training_dataloader: DataLoader,
     optimizer: Optimizer,
     rtmdet_loss: nn.Module,
@@ -40,6 +41,7 @@ def train_one_epoch(
         loss.backward()
 
         optimizer.step()
+        ema_model.update_parameters(model)
 
         running_loss += loss.item()
 
@@ -78,6 +80,11 @@ def train_model(training_config: TrainingConfig) -> None:
     device = torch.device(training_config.device)
     model.to(device)
 
+    ema_model = torch.optim.swa_utils.AveragedModel(
+        model,
+        multi_avg_fn=torch.optim.swa_utils.get_ema_multi_avg_fn(training_config.ema_decay),
+    )
+
     training_dataloader = get_dataloader(**training_config.training_dataloader_config)
     validation_dataloader = get_dataloader(**training_config.validation_dataloader_config)
 
@@ -88,8 +95,8 @@ def train_model(training_config: TrainingConfig) -> None:
     for i in range(training_config.epochs):
         print(f"Epoch {i + 1} / {training_config.epochs}")  # noqa: T201
 
-        training_mean_loss = train_one_epoch(model, training_dataloader, optimizer, loss, device)
-        validation_mean_loss = validate(model, validation_dataloader, loss, device)
+        training_mean_loss = train_one_epoch(model, ema_model, training_dataloader, optimizer, loss, device)
+        validation_mean_loss = validate(ema_model, validation_dataloader, loss, device)
 
         print(f"Training loss: {training_mean_loss}, validation loss: {validation_mean_loss}")  # noqa: T201
 
@@ -97,4 +104,4 @@ def train_model(training_config: TrainingConfig) -> None:
             best_validation_loss = validation_mean_loss
             training_config.weights_save_path.mkdir(parents=True, exist_ok=True)
             weights_path = training_config.weights_save_path.joinpath(f"{training_config.session_name}.pth")
-            torch.save(model.state_dict(), weights_path)
+            torch.save(ema_model.module.state_dict(), weights_path)

@@ -51,6 +51,8 @@ train_config:
     config:
       lr: 0.0004
       weight_decay: 0.05
+    
+  ema_decay: 0.9
 
   session_name: "test"
   weights_save_path: model_weights/trained
