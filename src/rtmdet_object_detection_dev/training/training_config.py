@@ -12,6 +12,7 @@ class TrainingConfig(BaseModel):
     validation_dataloader_config: dict[str, Any]
     loss_fn_config: dict[str, Any]
     optimizer_config: dict[str, Any]
+    lr_scheduler_config: dict[str, Any]
     ema_decay: float
     weights_save_path: Path
     session_name: str

@@ -1,3 +1,5 @@
+import logging
+
 import torch
 from torch import nn
 from torch.optim import Optimizer
@@ -9,8 +11,13 @@ from rtmdet_object_detection_dev.dataclasses.bbox_label_container import (
 from rtmdet_object_detection_dev.datasets.dataset_factory import get_dataloader
 from rtmdet_object_detection_dev.losses.loss_fn_factory import get_loss_fn
 from rtmdet_object_detection_dev.model.model import make_model
+from rtmdet_object_detection_dev.training.lr_scheduler_factory import get_lr_scheduler
 from rtmdet_object_detection_dev.training.optimizer_factory import get_optimizer
 from rtmdet_object_detection_dev.training.training_config import TrainingConfig
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 def gts_to_device(gts: list[BBoxLabelContainer], device: torch.device) -> list[BBoxLabelContainer]:
@@ -91,14 +98,17 @@ def train_model(training_config: TrainingConfig) -> None:
     loss = get_loss_fn(**training_config.loss_fn_config)
     optimizer = get_optimizer(model, **training_config.optimizer_config)
 
+    lr_scheduler = get_lr_scheduler(optimizer, **training_config.lr_scheduler_config)
+
     best_validation_loss = float("inf")
     for i in range(training_config.epochs):
-        print(f"Epoch {i + 1} / {training_config.epochs}")  # noqa: T201
+        logger.info("Epoch %s / %s", i + 1, training_config.epochs)
 
         training_mean_loss = train_one_epoch(model, ema_model, training_dataloader, optimizer, loss, device)
         validation_mean_loss = validate(ema_model, validation_dataloader, loss, device)
+        lr_scheduler.step()
 
-        print(f"Training loss: {training_mean_loss}, validation loss: {validation_mean_loss}")  # noqa: T201
+        logger.info("Training loss: %s, validation loss: %s", training_mean_loss, validation_mean_loss)
 
         if validation_mean_loss < best_validation_loss:
             best_validation_loss = validation_mean_loss
