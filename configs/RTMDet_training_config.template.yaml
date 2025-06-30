@@ -39,6 +39,7 @@ train_config:
             mean: *color_mean
             std: *color_std
           num_classes: *num_classes
+          augment: false
     batch_size: *batch_size
   
   loss_fn_config:
