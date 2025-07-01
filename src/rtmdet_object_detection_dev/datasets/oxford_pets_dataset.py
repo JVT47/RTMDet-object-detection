@@ -24,6 +24,8 @@ class OxfordPetDataset(Dataset):
         image_dir_path: Path,
         preprocessor_config: dict,
         num_classes: int = 37,
+        *,
+        augment: bool = True,
     ) -> None:
         """Initialize the dataset.
 
@@ -32,6 +34,7 @@ class OxfordPetDataset(Dataset):
         - image_dir_path: Path to the dir that contains the dataset images.
         - preprocessor_config: dict that is unpacked when initializing the RTMDetPreprocessor.
         - num_classes: number of classes in the dataset.
+        - augment: augment images and bboxes with large scale jitter and random cropping.
         """
         super().__init__()
 
@@ -42,13 +45,14 @@ class OxfordPetDataset(Dataset):
         self.preprocessor = RTMDetPreprocessor(**preprocessor_config)
 
         self.num_classes = num_classes
-        self.dest_size: tuple[int, int] = tuple(self.preprocessor.dest_size[-2:])  # type: ignore This produces the correct type
-        self.pad_color = self.preprocessor.pad_color
+        self.augment = augment
+        dest_size: tuple[int, int] = tuple(self.preprocessor.dest_size[-2:])  # type: ignore This produces the correct type
 
         self.transforms = v2.Compose(
             [
                 v2.RandomHorizontalFlip(),
-                v2.ScaleJitter(self.dest_size),
+                v2.ScaleJitter(dest_size),
+                v2.RandomCrop(dest_size, pad_if_needed=True, fill=self.preprocessor.pad_color),
             ],
         )
 
@@ -67,12 +71,13 @@ class OxfordPetDataset(Dataset):
         bboxes = self.preprocessor.process_bboxes(gt.bboxes, image.shape)
 
         image = self.preprocessor.process_image(image)
-        bboxes = torchvision.tv_tensors.BoundingBoxes(bboxes, format="XYXY", canvas_size=image.shape[-2:])  # type: ignore This works
 
+        if not self.augment:
+            return image, gt
+
+        bboxes = torchvision.tv_tensors.BoundingBoxes(bboxes, format="XYXY", canvas_size=image.shape[-2:])  # type: ignore This works
         image, bboxes = self.transforms(image, bboxes)
         gt.bboxes = bboxes.data
-
-        image = self._crop_to_dest_size(image)
 
         return image, gt
 
@@ -95,26 +100,6 @@ class OxfordPetDataset(Dataset):
 
         return BBoxLabelContainer(torch.stack(bboxes), torch.stack(labels))
 
-    def _crop_to_dest_size(self, image: torch.Tensor) -> torch.Tensor:
-        height, width = image.shape[-2:]
-
-        image = v2.functional.crop(
-            image,
-            0,
-            0,
-            height=self.dest_size[0],
-            width=self.dest_size[1],
-        )
-
-        pad_height = max(0, self.dest_size[0] - height)
-        pad_width = max(0, self.dest_size[1] - width)
-
-        pad_color = torch.tensor(self.pad_color).reshape(3, 1, 1)
-        image[:, self.dest_size[0] - pad_height :, :] = pad_color
-        image[:, :, self.dest_size[1] - pad_width :] = pad_color
-
-        return image
-
 
 if __name__ == "__main__":
     """Show random outputs of the dataset to test that it works."""
@@ -131,9 +116,10 @@ if __name__ == "__main__":
             "mean": (0, 0, 0),
             "std": (1, 1, 1),
         },
+        augment=False,
     )
 
-    indices = random.sample(range(len(dataset)), 10)
+    indices = random.sample(range(len(dataset)), 20)
 
     for i in indices:
         image, gt = dataset.__getitem__(i)

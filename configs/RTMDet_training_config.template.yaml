@@ -39,6 +39,7 @@ train_config:
             mean: *color_mean
             std: *color_std
           num_classes: *num_classes
+          augment: false
     batch_size: *batch_size
   
   loss_fn_config:
@@ -49,8 +50,15 @@ train_config:
   optimizer_config:
     name: "AdamW"
     config:
-      lr: 0.0004
+      lr: 0.001
       weight_decay: 0.05
+
+  lr_scheduler_config:
+    name: CosineAnnealingLR
+    config:
+      T_max: 80
+      eta_min: 0.0001
+  ema_decay: 0.9
 
   session_name: "test"
   weights_save_path: model_weights/trained
