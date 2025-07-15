@@ -1,6 +1,6 @@
 use image::ImageError;
 use ndarray::ShapeError;
-use ort::OrtError;
+use ort::Error;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -9,7 +9,7 @@ pub enum RTMDetError {
     Image(#[from] ImageError),
 
     #[error("ORT error: {0}")]
-    Ort(#[from] OrtError),
+    Ort(#[from] Error),
 
     #[error("Shape error: {0}")]
     Shape(#[from] ShapeError),

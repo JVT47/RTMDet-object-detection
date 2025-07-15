@@ -11,7 +11,7 @@ use inference::run_inference;
 use inference_config::InferenceConfig;
 use itertools::Itertools;
 use ndarray::{Axis, concatenate};
-use ort::{Environment, OrtError, Session, SessionBuilder};
+use ort::{Error, session::Session};
 
 pub struct InferenceEngine {
     session: Session,
@@ -19,19 +19,14 @@ pub struct InferenceEngine {
 }
 
 impl InferenceEngine {
-    pub fn new(model_path: &str, config: InferenceConfig) -> Result<Self, OrtError> {
-        let environment = Environment::builder()
-            .with_name("inference")
-            .build()?
-            .into_arc();
-
-        let session = SessionBuilder::new(&environment)?.with_model_from_file(model_path)?;
+    pub fn new(model_path: &str, config: InferenceConfig) -> Result<Self, Error> {
+        let session = Session::builder()?.commit_from_file(model_path)?;
 
         Ok(Self { session, config })
     }
 
     pub fn detect_from_images(
-        &self,
+        &mut self,
         images: Vec<DynamicImage>,
     ) -> RTMDetResult<Vec<DetectionOutput>> {
         let original_shapes = get_original_shapes(&images);
@@ -49,7 +44,7 @@ impl InferenceEngine {
 
             let batch = concatenate(Axis(0), &batch_views)?;
 
-            let model_outputs = run_inference(&self.session, batch)?;
+            let model_outputs = run_inference(&mut self.session, batch)?;
 
             detections.extend(postprocess_outputs(
                 model_outputs,
