@@ -66,7 +66,9 @@ mod tests {
         let img_buffer = RgbImage::from_raw(
             width,
             height,
-            Array3::zeros((width as usize, height as usize, 3)).into_raw_vec(),
+            Array3::zeros((width as usize, height as usize, 3))
+                .into_raw_vec_and_offset()
+                .0,
         )
         .unwrap();
 
@@ -90,7 +92,8 @@ mod tests {
         };
 
         let img_buffer =
-            RgbImage::from_raw(10, 5, Array3::ones((10, 5, 3)).into_raw_vec()).unwrap();
+            RgbImage::from_raw(10, 5, Array3::ones((10, 5, 3)).into_raw_vec_and_offset().0)
+                .unwrap();
 
         let image = DynamicImage::ImageRgb8(img_buffer);
 

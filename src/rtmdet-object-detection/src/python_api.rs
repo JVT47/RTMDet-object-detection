@@ -54,7 +54,7 @@ impl RTMDetDetector {
     }
 
     pub fn detect_from_numpy(
-        &self,
+        &mut self,
         py: Python<'_>,
         arrays: Vec<Py<PyArrayDyn<u8>>>,
     ) -> PyResult<Vec<DetectionOutput>> {

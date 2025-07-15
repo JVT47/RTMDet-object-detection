@@ -12,6 +12,7 @@
         "Conv",
         "convs",
         "cspnext",
+        "CUDA",
         "depthwise",
         "downsamples",
         "giou",
