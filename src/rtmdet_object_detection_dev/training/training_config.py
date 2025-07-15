@@ -17,4 +17,6 @@ class TrainingConfig(BaseModel):
     weights_save_path: Path
     session_name: str
     epochs: int
+    early_stopping_threshold: float
+    early_stopping_patience: int
     device: str

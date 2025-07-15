@@ -77,6 +77,26 @@ def validate(
         return running_loss / len(validation_dataloader)
 
 
+def save_best_model(model: nn.Module, training_config: TrainingConfig) -> None:
+    """Save the model to disk."""
+    training_config.weights_save_path.mkdir(parents=True, exist_ok=True)
+    weights_path = training_config.weights_save_path.joinpath(f"{training_config.session_name}.pth")
+    torch.save(model.state_dict(), weights_path)
+
+
+def is_substantial_increase(validation_loss: float, best_validation_loss: float, threshold: float) -> bool:
+    """Measure if the validation loss has risen substantially from the best loss."""
+    if best_validation_loss == float("inf"):
+        return False
+
+    eps = 1e-10
+    if best_validation_loss < eps:
+        return True
+
+    relative_increase = (validation_loss - best_validation_loss) / best_validation_loss
+    return relative_increase > threshold
+
+
 def train_model(training_config: TrainingConfig) -> None:
     """Train the model according to the given config.
 
@@ -101,6 +121,7 @@ def train_model(training_config: TrainingConfig) -> None:
     lr_scheduler = get_lr_scheduler(optimizer, **training_config.lr_scheduler_config)
 
     best_validation_loss = float("inf")
+    epochs_since_improvement = 0
     for i in range(training_config.epochs):
         logger.info("Epoch %s / %s", i + 1, training_config.epochs)
 
@@ -110,8 +131,26 @@ def train_model(training_config: TrainingConfig) -> None:
 
         logger.info("Training loss: %s, validation loss: %s", training_mean_loss, validation_mean_loss)
 
-        if validation_mean_loss < best_validation_loss:
+        is_best_loss = validation_mean_loss < best_validation_loss
+        if is_best_loss:
             best_validation_loss = validation_mean_loss
-            training_config.weights_save_path.mkdir(parents=True, exist_ok=True)
-            weights_path = training_config.weights_save_path.joinpath(f"{training_config.session_name}.pth")
-            torch.save(ema_model.module.state_dict(), weights_path)
+            epochs_since_improvement = 0
+            save_best_model(ema_model.module, training_config)
+            continue
+
+        if is_substantial_increase(
+            validation_mean_loss,
+            best_validation_loss,
+            training_config.early_stopping_threshold,
+        ):
+            epochs_since_improvement += 1
+            logger.info("Validation loss increased substantially for %s epoch(s).", epochs_since_improvement)
+        else:
+            epochs_since_improvement = 0
+
+        if epochs_since_improvement >= training_config.early_stopping_patience:
+            logger.info(
+                "Early stopping triggered after %s substantial increases in validation loss.",
+                training_config.early_stopping_patience,
+            )
+            break

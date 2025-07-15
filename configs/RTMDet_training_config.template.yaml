@@ -63,4 +63,6 @@ train_config:
   session_name: "test"
   weights_save_path: model_weights/trained
   epochs: 80
+  early_stopping_threshold: 0.01
+  early_stopping_patience: 5
   device: "cuda:0"
