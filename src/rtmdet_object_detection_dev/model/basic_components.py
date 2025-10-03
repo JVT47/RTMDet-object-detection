@@ -194,10 +194,6 @@ class SPPFBottleneck(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Perform module calculations."""
         x = self.conv1(x)
-        pooling1 = self.poolings[0](x)
-        pooling2 = self.poolings[1](pooling1)
-        pooling3 = self.poolings[2](pooling2)
-
-        out = torch.concat([x, pooling1, pooling2, pooling3], dim=1)
-
+        pooled = [pool(x) for pool in self.poolings]
+        out = torch.cat([x, *pooled], dim=1)
         return self.conv2(out)
