@@ -9,7 +9,6 @@ If you’re interested in understanding how the detector works, I recommend read
 
 In my master’s thesis, I used RTMDet-Tiny and provided a detailed explanation of its implementation in subsections 3.1.1–3.1.4. You can find the thesis here: (https://aaltodoc.aalto.fi/items/ceb91022-2998-4c0c-a9c1-9ed64250aca6). Please note that my thesis may contain some errors. Below are a few corrections I’ve identified:
 - Figure 7: The DWConvModule is missing the pointwise convolution.
-- Figure 7: The SPPFBottleneck should apply the pooling layers in parallel instead of sequentially.
 - Figure 8: The second output should be a Conv2D, not a ConvModule.
 - Algorithm 4: The cost vector should be sorted in ascending order, not descending.
 
