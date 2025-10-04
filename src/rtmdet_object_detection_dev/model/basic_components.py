@@ -176,13 +176,7 @@ class SPPFBottleneck(nn.Module):
             stride=1,
             padding=0,
         )
-        self.poolings = nn.ModuleList(
-            [
-                nn.MaxPool2d(kernel_size=5, stride=1, padding=2, dilation=1, ceil_mode=False),
-                nn.MaxPool2d(kernel_size=9, stride=1, padding=4, dilation=1, ceil_mode=False),
-                nn.MaxPool2d(kernel_size=13, stride=1, padding=6, dilation=1, ceil_mode=False),
-            ],
-        )
+        self.pooling = nn.MaxPool2d(kernel_size=5, stride=1, padding=2, dilation=1, ceil_mode=False)
         self.conv2 = ConvModule(
             (in_channels // 2) * 4,
             out_channels=in_channels,
@@ -194,9 +188,10 @@ class SPPFBottleneck(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Perform module calculations."""
         x = self.conv1(x)
-        pooling1 = self.poolings[0](x)
-        pooling2 = self.poolings[1](pooling1)
-        pooling3 = self.poolings[2](pooling2)
+
+        pooling1 = self.pooling(x)
+        pooling2 = self.pooling(pooling1)
+        pooling3 = self.pooling(pooling2)
 
         out = torch.concat([x, pooling1, pooling2, pooling3], dim=1)
 
